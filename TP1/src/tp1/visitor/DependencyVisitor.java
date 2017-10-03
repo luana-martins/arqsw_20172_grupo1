@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jface.text.Document;
 
 public class DependencyVisitor extends ASTVisitor {
 
@@ -33,7 +34,7 @@ public class DependencyVisitor extends ASTVisitor {
 
 		this.fullClass = (CompilationUnit) parser.createAST(null);// parse
 		this.fullClass.accept(this);
-
+		
 	}
 
 	public ArrayList<MethodDeclaration> getMapMethods() {
@@ -42,13 +43,11 @@ public class DependencyVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
-
 		if (arrayMethod == null) {
 			arrayMethod = new ArrayList<MethodDeclaration>();
 		}
-
 		arrayMethod.add(node);
-
 		return true;
 	}
+	
 }

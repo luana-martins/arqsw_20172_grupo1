@@ -15,9 +15,6 @@ import org.eclipse.swt.SWT;
 
 public class SampleView extends ViewPart {
 
-	/**
-	 * The ID of the view as specified by the extension.
-	 */
 	public static final String ID = "tp1.views.SampleView";
 
 	private TableViewer viewer;
@@ -38,30 +35,23 @@ public class SampleView extends ViewPart {
 		}
 	}
 
-/**
-	 * The constructor.
-	 */
 	public SampleView() {
 	}
 
-	/**
-	 * This is a callback that will allow us
-	 * to create the viewer and initialize it.
-	 */
 	public void createPartControl(Composite parent) {
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
-		viewer.setInput(new String[] { "One", "Two", "Three" });
-	viewer.setLabelProvider(new ViewLabelProvider());
-
+		//viewer.setInput(new String[] { "One", "Two", "Three" });
+	    //viewer.setLabelProvider(new ViewLabelProvider());
+	    System.out.println("aeiasb");
 		// Create the help context id for the viewer's control
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "TP1.viewer");
 		getSite().setSelectionProvider(viewer);
 		makeActions();
-		hookContextMenu();
-		hookDoubleClickAction();
-		contributeToActionBars();
+		//hookContextMenu();
+		//hookDoubleClickAction();
+		//contributeToActionBars();
 	}
 
 	private void hookContextMenu() {

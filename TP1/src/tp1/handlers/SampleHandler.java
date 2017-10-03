@@ -1,6 +1,9 @@
 package tp1.handlers;
 
 import java.util.ArrayList;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -11,6 +14,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -43,9 +47,9 @@ public class SampleHandler extends AbstractHandler {
 		for (int i = 0; i < allMethods.size(); i++) {
 			int tamanhoMetodo = allMethods.get(i).getLength();
 			totalTamMetodos += tamanhoMetodo;
-			System.out.println("Metodo: " + allMethods.get(i).resolveBinding().getJavaElement().getElementName());
-			System.out.println("Tamanho: " + tamanhoMetodo);
-			System.out.println();
+		//	System.out.println("Metodo: " + allMethods.get(i).resolveBinding().getJavaElement().getElementName());
+		//	System.out.println("Tamanho: " + tamanhoMetodo);
+		//	System.out.println();
 		}
 
 		double mediaTamMetodos = totalTamMetodos / allMethods.size();
@@ -53,9 +57,9 @@ public class SampleHandler extends AbstractHandler {
 		for (int i = 0; i < allMethods.size(); i++) {
 			int tamanhoMetodo = allMethods.get(i).getLength();
 			if (tamanhoMetodo >= mediaTamMetodos * 2) {
-				System.out.println("Metodo " + allMethods.get(i).resolveBinding().getJavaElement().getElementName()
-						+ " parece ser longo");
-				System.out.println();
+			//	System.out.println("Metodo " + allMethods.get(i).resolveBinding().getJavaElement().getElementName()
+				//		+ " parece ser longo");
+			//	System.out.println();
 			}
 
 		}
@@ -75,17 +79,45 @@ public class SampleHandler extends AbstractHandler {
 			public boolean visit(IResource resource) throws JavaModelException {
 				if (resource instanceof IFile && resource.getName().endsWith(".java")) {
 					ICompilationUnit unit = ((ICompilationUnit) JavaCore.create((IFile) resource));
-
 					DependencyVisitor dp = new DependencyVisitor(unit);
 					map.addAll(dp.getMapMethods());
-
+					 try {
+						metodoInfo(unit);
+					} catch (BadLocationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					//tamanhoLinhaEmCaracteres(linhas);
+					
 				}
 				return true;
 			}
 		});
 		return map;
 	}
-
+	
+	/**
+	 * CONFERIR
+	 * */
+	public void metodoInfo(ICompilationUnit unit) throws JavaModelException, BadLocationException{
+		IType[] allTypes = unit.getAllTypes();
+		
+		for (IType type : allTypes) {
+			IMethod[] methods = type.getMethods();
+			System.out.println("\nClasse: "+ unit.getElementName());
+			System.out.println("Número de métodos da classe: "+ type.getMethods().length);
+			System.out.println("");
+			for(IMethod method : methods){
+				Document doc = new Document(method.getSource());
+				System.out.println("Método: "+ method.getElementName());
+				System.out.println("Número de linhas do método: " + doc.getNumberOfLines());
+				System.out.println("Quantidade de parâmetros do método: "+method.getNumberOfParameters());
+				for(int i =0; i<doc.getNumberOfLines();i++){
+					System.out.println("Linha "+i+ ": " +doc.getLineLength(i));
+				}
+			}	 	
+		}
+	}
 	private IProject getProjectFromWorkspace(ExecutionEvent event) {
 
 		TreeSelection selection = (TreeSelection) HandlerUtil.getCurrentSelection(event);
