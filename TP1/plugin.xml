@@ -39,7 +39,7 @@
             <command
                   commandId="TP1.commands.sampleCommand"
                   icon="icons/pokeball.png"
-                  tooltip="Detectar métodos longos..."
+                  tooltip="Analisar métodos..."
                   id="TP1.toolbars.sampleCommand">
             </command>
          </toolbar>
@@ -49,14 +49,14 @@
          point="org.eclipse.ui.views">
       <category
             id="TP1"
-            name="Sample Category">
+            name="Análise Estática">
       </category>
       <view
             category="TP1"
             class="tp1.views.SampleView"
-            icon="icons/sample.gif"
+            icon="icons/pokeball.png"
             id="tp1.views.SampleView"
-            name="Sample View">
+            name="Métodos">
       </view>
    </extension>
    <extension

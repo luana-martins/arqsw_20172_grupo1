@@ -3,7 +3,6 @@ package tp1.handlers;
 import java.util.ArrayList;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -17,107 +16,78 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.internal.core.JavaProject;
-import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
-
-import tp1.visitor.DependencyVisitor;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeSelection;
 
+@SuppressWarnings("restriction")
 public class SampleHandler extends AbstractHandler {
 
-	private ArrayList<MethodDeclaration> allMethods;
+	public static ArrayList<IMethod> allMethods;
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
+		allMethods = new ArrayList<IMethod>();
+
+		hideView();
+
 		IProject iProject = getProjectFromWorkspace(event);
 
 		try {
-			allMethods = getClassesMethods(iProject);
+			getClassesMethods(iProject);
 		} catch (CoreException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		int totalTamMetodos = 0;
-		for (int i = 0; i < allMethods.size(); i++) {
-			int tamanhoMetodo = allMethods.get(i).getLength();
-			totalTamMetodos += tamanhoMetodo;
-		//	System.out.println("Metodo: " + allMethods.get(i).resolveBinding().getJavaElement().getElementName());
-		//	System.out.println("Tamanho: " + tamanhoMetodo);
-		//	System.out.println();
-		}
+		openView();
 
-		double mediaTamMetodos = totalTamMetodos / allMethods.size();
-
-		for (int i = 0; i < allMethods.size(); i++) {
-			int tamanhoMetodo = allMethods.get(i).getLength();
-			if (tamanhoMetodo >= mediaTamMetodos * 2) {
-			//	System.out.println("Metodo " + allMethods.get(i).resolveBinding().getJavaElement().getElementName()
-				//		+ " parece ser longo");
-			//	System.out.println();
-			}
-
-		}
-
-		allMethods.clear();
+		allMethods = null;
 
 		return null;
 
 	}
 
-	private ArrayList<MethodDeclaration> getClassesMethods(final IProject project) throws CoreException {
-
-		ArrayList<MethodDeclaration> map = new ArrayList<MethodDeclaration>();
+	private void getClassesMethods(final IProject project) throws CoreException {
 		project.accept(new IResourceVisitor() {
 
 			@Override
 			public boolean visit(IResource resource) throws JavaModelException {
 				if (resource instanceof IFile && resource.getName().endsWith(".java")) {
 					ICompilationUnit unit = ((ICompilationUnit) JavaCore.create((IFile) resource));
-					DependencyVisitor dp = new DependencyVisitor(unit);
-					map.addAll(dp.getMapMethods());
-					 try {
+
+					try {
 						metodoInfo(unit);
 					} catch (BadLocationException e) {
-						// TODO Auto-generated catch block
+
 						e.printStackTrace();
 					}
-					//tamanhoLinhaEmCaracteres(linhas);
-					
+
 				}
 				return true;
 			}
 		});
-		return map;
 	}
-	
-	/**
-	 * CONFERIR
-	 * */
-	public void metodoInfo(ICompilationUnit unit) throws JavaModelException, BadLocationException{
+
+	private void metodoInfo(ICompilationUnit unit) throws JavaModelException, BadLocationException {
 		IType[] allTypes = unit.getAllTypes();
-		
+
 		for (IType type : allTypes) {
 			IMethod[] methods = type.getMethods();
-			System.out.println("\nClasse: "+ unit.getElementName());
-			System.out.println("Número de métodos da classe: "+ type.getMethods().length);
-			System.out.println("");
-			for(IMethod method : methods){
-				Document doc = new Document(method.getSource());
-				System.out.println("Método: "+ method.getElementName());
-				System.out.println("Número de linhas do método: " + doc.getNumberOfLines());
-				System.out.println("Quantidade de parâmetros do método: "+method.getNumberOfParameters());
-				for(int i =0; i<doc.getNumberOfLines();i++){
-					System.out.println("Linha "+i+ ": " +doc.getLineLength(i));
-				}
-			}	 	
+
+			for (IMethod method : methods) {
+				allMethods.add(method);
+
+			}
 		}
 	}
+
 	private IProject getProjectFromWorkspace(ExecutionEvent event) {
 
 		TreeSelection selection = (TreeSelection) HandlerUtil.getCurrentSelection(event);
@@ -136,6 +106,24 @@ public class SampleHandler extends AbstractHandler {
 		} catch (ClassCastException e) {
 			p = (Project) selection.getFirstElement();
 			return p.getProject();
+		}
+	}
+
+	private void hideView() {
+		IWorkbenchPage wp = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+
+		// Acha a view :
+		IViewPart myView = wp.findView("tp1.views.SampleView");
+
+		// Esconde a view :
+		wp.hideView(myView);
+	}
+
+	private void openView() {
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("tp1.views.SampleView");
+		} catch (PartInitException e) {
+			e.printStackTrace();
 		}
 	}
 }
