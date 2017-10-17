@@ -30,11 +30,11 @@ import org.eclipse.jface.viewers.TreeSelection;
 @SuppressWarnings("restriction")
 public class SampleHandler extends AbstractHandler {
 	
-	public static ArrayList<DadosDoProjeto> arrayDados= new ArrayList<DadosDoProjeto>();;
+	public static ArrayList<DadosDoProjeto> arrayDados;
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
+		arrayDados = new ArrayList<DadosDoProjeto>();
 		hideView();
 
 		IProject iProject = getProjectFromWorkspace(event);
