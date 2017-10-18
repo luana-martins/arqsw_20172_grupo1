@@ -1,9 +1,8 @@
 package tp1.handlers;
 
-
 import java.util.ArrayList;
+
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -29,12 +28,14 @@ import org.eclipse.jface.viewers.TreeSelection;
 
 @SuppressWarnings("restriction")
 public class SampleHandler extends AbstractHandler {
-	
-	public static ArrayList<DadosDoProjeto> arrayDados;
+
+	public static ArrayList<IMethod> allMethods;
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		arrayDados = new ArrayList<DadosDoProjeto>();
+
+		allMethods = new ArrayList<IMethod>();
+
 		hideView();
 
 		IProject iProject = getProjectFromWorkspace(event);
@@ -45,12 +46,12 @@ public class SampleHandler extends AbstractHandler {
 			e.printStackTrace();
 		}
 
-		Metrica metrica = new Metrica();
-		metrica.mediaTamanhoMetodos();
-		metrica.tamanhoMetodo();
-		
 		openView();
+
+		allMethods = null;
+
 		return null;
+
 	}
 
 	private void getClassesMethods(final IProject project) throws CoreException {
@@ -60,11 +61,14 @@ public class SampleHandler extends AbstractHandler {
 			public boolean visit(IResource resource) throws JavaModelException {
 				if (resource instanceof IFile && resource.getName().endsWith(".java")) {
 					ICompilationUnit unit = ((ICompilationUnit) JavaCore.create((IFile) resource));
+
 					try {
 						metodoInfo(unit);
 					} catch (BadLocationException e) {
+
 						e.printStackTrace();
 					}
+
 				}
 				return true;
 			}
@@ -73,15 +77,15 @@ public class SampleHandler extends AbstractHandler {
 
 	private void metodoInfo(ICompilationUnit unit) throws JavaModelException, BadLocationException {
 		IType[] allTypes = unit.getAllTypes();
-		DadosDoProjeto dados = null;
-		 	for (IType type : allTypes) {
-		 		IMethod[] methods = type.getMethods();
-				for(IMethod method : methods){
-					Document doc = new Document(method.getSource());
-		 			dados =  new DadosDoProjeto(unit.getElementName(),method.getElementName(), doc.getNumberOfLines(), 0);
-		 			arrayDados.add(dados);
-		 		}	 	
+
+		for (IType type : allTypes) {
+			IMethod[] methods = type.getMethods();
+
+			for (IMethod method : methods) {
+				allMethods.add(method);
+
 			}
+		}
 	}
 
 	private IProject getProjectFromWorkspace(ExecutionEvent event) {
