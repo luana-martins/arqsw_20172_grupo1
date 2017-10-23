@@ -2,16 +2,7 @@ package tp1.handlers;
 
 import java.util.ArrayList;
 
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-
-import java.util.Collections;
-import java.util.Comparator;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 
@@ -24,7 +15,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.ui.IViewPart;
@@ -40,11 +31,13 @@ import org.eclipse.jface.viewers.TreeSelection;
 public class SampleHandler extends AbstractHandler {
 
 	public static ArrayList<DadosDoProjeto> arrayDados;
+	public static ExecutionEvent event;
 	protected ArrayList<Integer> statements;
 	private ArrayList<ITypeBinding> fCatchedExceptions;
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		SampleHandler.event = event;
 		arrayDados = new ArrayList<DadosDoProjeto>();
 		hideView();
 
@@ -56,16 +49,9 @@ public class SampleHandler extends AbstractHandler {
 			e.printStackTrace();
 		}
 
-		Metrica metrica = new Metrica();
-		metrica.mediaTamanhoMetodos();
-		metrica.tamanhoMetodo();
-
-		ordenarMetodos();
+		
 		openView();
 
-		MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Informação",
-				" Métrica MCL (Caracteres por Linha) = " + metrica.getCPL() + "\n Métrica MLM (Linhas por Método) = "
-						+ metrica.getLPM() + "\n Métrica TMM (Médio dos Métodos) = " + metrica.getTMM());
 		return null;
 	}
 
@@ -90,8 +76,6 @@ public class SampleHandler extends AbstractHandler {
 	private void metodoInfo(ICompilationUnit unit) throws JavaModelException, BadLocationException {
 
 		IType[] allTypes = unit.getAllTypes();
-		System.out.println("Classe: " + unit.getElementName());
-		DadosDoProjeto dados = null;
 		String a = "";
 
 		for (IType type : allTypes) {
@@ -100,9 +84,8 @@ public class SampleHandler extends AbstractHandler {
 			int cont = 0;
 			String var = null;
 			for (IMethod method : methods) {
-
-				System.out.println("Método: " + method.getElementName());
-				Document doc =  new Document(method.getSource());
+				boolean mudou = false;
+				Document doc = new Document(method.getSource());
 				if (method.getSource().contains("return")) {
 					int j = 0;
 					String stringReturn = "";
@@ -124,36 +107,34 @@ public class SampleHandler extends AbstractHandler {
 					}
 					int l = 0;
 					for (int i = 0; i < doc.getNumberOfLines(); i++) {
-						if(doc.get(l, doc.getLineLength(i)).toString().contains("return")){
+						if (doc.get(l, doc.getLineLength(i)).toString().contains("return")) {
 							doc.replace(l, doc.getLineLength(i), "");
 						}
-						if(!(doc.get(l, doc.getLineLength(i)).toString().contains("int")) ||
-								(doc.get(l, doc.getLineLength(i)).toString().contains("float"))||
-								(doc.get(l, doc.getLineLength(i)).toString().contains("double"))||
-								(doc.get(l, doc.getLineLength(i)).toString().contains("char"))||
-								(doc.get(l, doc.getLineLength(i)).toString().contains("String"))
-								){
+						if (!(doc.get(l, doc.getLineLength(i)).toString().contains("int"))
+								|| (doc.get(l, doc.getLineLength(i)).toString().contains("float"))
+								|| (doc.get(l, doc.getLineLength(i)).toString().contains("double"))
+								|| (doc.get(l, doc.getLineLength(i)).toString().contains("char"))
+								|| (doc.get(l, doc.getLineLength(i)).toString().contains("String"))) {
 							if (doc.get(l, doc.getLineLength(i)).toString().contains(var + "=")) {
-								a= doc.get(l, doc.getLineLength(i)).toString().replace(var + "=", "return");
+								a = doc.get(l, doc.getLineLength(i)).toString().replace(var + "=", "return");
 								doc.replace(l, doc.getLineLength(i), a);
+								mudou = true;
 							}
 							if (doc.get(l, doc.getLineLength(i)).toString().contains(var + " =")) {
 								a = doc.get(l, doc.getLineLength(i)).toString().replace(var + " =", "return");
 								doc.replace(l, doc.getLineLength(i), a);
+								mudou = true;
 							}
 						}
 						l += doc.getLineLength(i);
 					}
 
-					int numChars = 0;
-					for (int s = 0; s < doc.getNumberOfLines(); s++) {
-						numChars += doc.getLineLength(s);
-					}
-					dados = new DadosDoProjeto(unit.getElementName(), method.getElementName(), doc.getNumberOfLines(),
-							0, numChars);
-					arrayDados.add(dados);
 				}
-				System.out.println(doc.get());
+				if (mudou) {
+					arrayDados.add(new DadosDoProjeto(type.getFullyQualifiedName(), method.getElementName(),
+							doc.get().toString()));
+				}
+
 			}
 		}
 	}
@@ -197,14 +178,4 @@ public class SampleHandler extends AbstractHandler {
 		}
 	}
 
-	private void ordenarMetodos() {
-		Collections.sort(arrayDados, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				DadosDoProjeto d1 = (DadosDoProjeto) o1;
-				DadosDoProjeto d2 = (DadosDoProjeto) o2;
-				return d1.getPorcentagem() > d2.getPorcentagem() ? -1
-						: (d1.getPorcentagem() < d2.getPorcentagem() ? +1 : 0);
-			}
-		});
-	}
 }

@@ -1,28 +1,17 @@
 package tp1.handlers;
 
+
 public class DadosDoProjeto {
 
 	private String nomeDaClasse;
 	private String nomeDoMetodo;
-	private int qtdeDeLinhas;
-	private int porcentagem;
-	private int numCaracteres;
+	private String declaracaoDoMetodo;
 	
 
-	public DadosDoProjeto(String nomeDaClasse, String nomeDoMetodo, int qtdeDeLinhas, int porcentagem, int numCaracteres) {
+	public DadosDoProjeto(String nomeDaClasse, String nomeDoMetodo, String declaracaoDoMetodo /*int qtdeDeLinhas, int porcentagem, int numCaracteres*/) {
 		this.nomeDaClasse = nomeDaClasse;  
 		this.nomeDoMetodo = nomeDoMetodo;
-		this.qtdeDeLinhas = qtdeDeLinhas;
-		this.porcentagem = porcentagem;
-		this.numCaracteres = numCaracteres;
-	}
-
-	public int getPorcentagem() {
-		return porcentagem;
-	}
-
-	public void setPorcentagem(int porcentagem) {
-		this.porcentagem = porcentagem;
+		this.declaracaoDoMetodo = declaracaoDoMetodo;
 	}
 
 	public String getNomeDaClasse() {
@@ -32,14 +21,9 @@ public class DadosDoProjeto {
 	public String getNomeDoMetodo() {
 		return nomeDoMetodo;
 	}
-
-	public int getQtdeDeLinhas() {
-		return qtdeDeLinhas;
-	}
 	
-	public int getNumCaracteres() {
-		return numCaracteres;
+	public String getDeclaracaoDoMetodo(){
+		return declaracaoDoMetodo;
 	}
-
 	
 }
