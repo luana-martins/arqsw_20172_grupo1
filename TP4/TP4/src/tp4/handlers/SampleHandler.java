@@ -2,9 +2,7 @@ package tp4.handlers;
 
 import java.util.ArrayList;
 
-
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jdt.core.dom.IfStatement;
 
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -33,45 +31,39 @@ import org.eclipse.jface.viewers.TreeSelection;
 @SuppressWarnings("restriction")
 public class SampleHandler extends AbstractHandler {
 
-	public static ArrayList<MethodDeclaration> arrayDados;
+	public static ArrayList<IfStatement> arrayResults;
 	public static ExecutionEvent event;
-	protected ArrayList<Integer> statements;
 	
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		SampleHandler.event = event;
-		arrayDados = new ArrayList<MethodDeclaration>();
+		arrayResults = new ArrayList<IfStatement>();
 		hideView();
 
 		IProject iProject = getProjectFromWorkspace(event);
 
 		try {
-			getMethods(iProject);
+			findIfs(iProject);
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
-		
-		
-		
-
 		
 		openView();
 
 		return null;
 	}
 
-	private void getMethods(final IProject project) throws CoreException {
+	private void findIfs(final IProject project) throws CoreException {
 		project.accept(new IResourceVisitor() {
 
 			@Override
 			public boolean visit(IResource resource) throws JavaModelException {
 				if (resource instanceof IFile && resource.getName().endsWith(".java")) {
 					ICompilationUnit unit = ((ICompilationUnit) JavaCore.create((IFile) resource));
-					try {
-						metodoInfo(unit);
-					} catch (BadLocationException e) {
-						e.printStackTrace();
+					DependencyVisitor dp = new DependencyVisitor(unit);
+					if(dp.getArrayIf() != null){
+						arrayResults.addAll(dp.getArrayIf());
 					}
 				}
 				return true;
@@ -79,15 +71,6 @@ public class SampleHandler extends AbstractHandler {
 		});
 	}
 
-	private void metodoInfo(ICompilationUnit unit) throws JavaModelException, BadLocationException {
-		try{
-			DependencyVisitor dp = new DependencyVisitor(unit);
-			arrayDados.addAll(dp.getArrayMethod());
-		}catch(NullPointerException e){
-			
-		}
-		
-	}
 
 	private IProject getProjectFromWorkspace(ExecutionEvent event) {
 

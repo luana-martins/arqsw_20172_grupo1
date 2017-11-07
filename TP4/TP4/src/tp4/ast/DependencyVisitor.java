@@ -2,7 +2,6 @@ package tp4.ast;
 
 import java.util.ArrayList;
 
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -11,7 +10,8 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
 
 
@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 public class DependencyVisitor extends ASTVisitor {
 
 	private CompilationUnit fullClass;
-	private ArrayList<MethodDeclaration> arrayMethod;
+	private ArrayList<IfStatement> arrayIf;
 
 
 	@SuppressWarnings("deprecation")
@@ -38,28 +38,35 @@ public class DependencyVisitor extends ASTVisitor {
 			this.fullClass.accept(this);
 	}
 	
-	public ArrayList<MethodDeclaration> getArrayMethod() {
-		return arrayMethod;
-	}
-	
-	@Override
-	public boolean visit(MethodDeclaration node) {
-		
-		//IMethod imeth = (IMethod) node.resolveBinding().getJavaElement();
-		
-		if(arrayMethod==null){
-			arrayMethod = new ArrayList<MethodDeclaration>();
-		}
-		arrayMethod.add(node);
-		
-		return true;
+	public ArrayList<IfStatement> getArrayIf() {
+		return arrayIf;
 	}
 	
 	@Override
     public boolean visit(IfStatement ifStatement) {
 		System.out.println(ifStatement);
 		System.out.println(ifStatement.getExpression());
+		try{
+			InfixExpression e = (InfixExpression) ifStatement.getExpression();
+			if(e.getLeftOperand().resolveTypeBinding().isEnum()
+					&& e.getRightOperand().resolveTypeBinding().isEnum()){
+				if(arrayIf==null){
+					arrayIf = new ArrayList<IfStatement>();
+				}
+				arrayIf.add(ifStatement);
+			}
 			
+		}catch(ClassCastException e){
+			MethodInvocation m =  (MethodInvocation) ifStatement.getExpression();
+			if(m.getExpression().resolveTypeBinding().isEnum()){
+				if(arrayIf==null){
+					arrayIf = new ArrayList<IfStatement>();
+				}
+				arrayIf.add(ifStatement);
+			}		
+		}
+		
+		
 		return true;
 	}
 }

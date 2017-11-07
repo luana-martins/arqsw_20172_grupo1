@@ -1,15 +1,11 @@
 package tp4.views;
 
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.*;
-
-import tp4.handlers.DadosDoProjeto;
 import tp4.handlers.SampleHandler;
 
-import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -36,8 +32,8 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				MethodDeclaration m = (MethodDeclaration) element;
-				return m.getName().toString();
+				IfStatement i = (IfStatement) element;
+				return i.toString();
 			}
 		});
 
@@ -45,8 +41,8 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				MethodDeclaration m = (MethodDeclaration) element;
-				return m.getParent().toString();
+				IfStatement i = (IfStatement) element;
+				return i.getExpression().toString();
 			}
 		});
 
@@ -58,7 +54,7 @@ public class SampleView extends ViewPart {
 
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
 
-		viewer.setInput(SampleHandler.arrayDados);
+		viewer.setInput(SampleHandler.arrayResults);
 		getSite().setSelectionProvider(viewer);
 
 		GridData gridData = new GridData();
@@ -96,11 +92,11 @@ public class SampleView extends ViewPart {
 	
 		doubleClickAction = new Action() {
 			public void run() {
-				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+				/*IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 				DadosDoProjeto dados = (DadosDoProjeto) selection.getFirstElement();
 				
 				MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação", dados.getDeclaracaoDoMetodo());
-
+*/
 				
 
 			}
