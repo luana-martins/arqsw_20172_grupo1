@@ -9,18 +9,18 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-
-
+import tp4.handlers.Enumerado;
 
 public class DependencyVisitor extends ASTVisitor {
 
 	private CompilationUnit fullClass;
 	private ArrayList<IfStatement> arrayIf;
-
+	private Enumerado enumerado;
 
 	@SuppressWarnings("deprecation")
 	public DependencyVisitor(ICompilationUnit unit) throws JavaModelException {
@@ -39,6 +39,11 @@ public class DependencyVisitor extends ASTVisitor {
 	
 	public ArrayList<IfStatement> getArrayIf() {
 		return arrayIf;
+	}
+	
+	public boolean visit(EnumDeclaration anota){
+		enumerado = new Enumerado( anota.enumConstants(),anota.getName().toString());
+		return true;
 	}
 	
 	@Override
@@ -62,8 +67,11 @@ public class DependencyVisitor extends ASTVisitor {
 				arrayIf.add(ifStatement);
 			}		
 		}
-		
-		
 		return true;
 	}
+	
+	public Enumerado getEnumerado() {
+		return enumerado;
+	}
+
 }
