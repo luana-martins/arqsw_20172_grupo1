@@ -34,6 +34,7 @@ public class SampleHandler extends AbstractHandler {
 	public static ArrayList<IfStatement> arrayResults;
 	public static ExecutionEvent event;
 	private Enumerado param;
+	private Classes classe;
 	
 
 	@Override
@@ -51,6 +52,7 @@ public class SampleHandler extends AbstractHandler {
 		}
 		PadraoDeProjeto pp = new PadraoDeProjeto();
 		pp.escreverFabrica(param);
+		pp.escreverClasses(param, classe);
 		openView();
 
 		return null;
@@ -67,7 +69,7 @@ public class SampleHandler extends AbstractHandler {
 					if(dp.getArrayIf() != null){
 						arrayResults.addAll(dp.getArrayIf());
 					}
-					System.out.println("if "+dp.getArrayIf());
+					//System.out.println("if "+dp.getArrayIf());
 					param = dp.getEnumerado();
 				}
 				return true;

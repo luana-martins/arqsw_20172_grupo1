@@ -27,7 +27,25 @@ public class PadraoDeProjeto {
 			System.out.println(codigoEnumAbstract+"\n}");
 	}
 	
-	public void escreverClasses(Enumerado param) {
-		System.out.println("public enum "+param.getNomeMetodo()+" {");
+
+
+	public void escreverClasses(Enumerado param, Classes classe) {
+		String a;
+		String metodo = "";
+		for(int i = 0; i < param.getNomeEnum().size();i++) {
+			System.out.println("public class "+param.getNomeEnum().get(i)+" implements "+param.getNomeMetodo()+" {\n\t");
+		}
+//		metodo += "public ";
+//  	metodo+= int;
+//		metodo+= " ";
+//		metodo+= classe.getMetodo();
+//		metodo+="(";
+//		metodo+=classe.getParametros().get(i);
+//		metodo+=") {";
+//	System.out.println(metodo);
+		
+		 
+		
 	}
+	
 }

@@ -1,6 +1,7 @@
 package tp4.ast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
@@ -12,8 +13,10 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+import tp4.handlers.Classes;
 import tp4.handlers.Enumerado;
 
 public class DependencyVisitor extends ASTVisitor {
@@ -21,6 +24,10 @@ public class DependencyVisitor extends ASTVisitor {
 	private CompilationUnit fullClass;
 	private ArrayList<IfStatement> arrayIf;
 	private Enumerado enumerado;
+	private Classes classe;
+	private List parametros;
+	private String a = "";
+	private String metodo="";
 
 	@SuppressWarnings("deprecation")
 	public DependencyVisitor(ICompilationUnit unit) throws JavaModelException {
@@ -43,11 +50,21 @@ public class DependencyVisitor extends ASTVisitor {
 	
 	public boolean visit(EnumDeclaration anota){
 		enumerado = new Enumerado( anota.enumConstants(),anota.getName().toString());
+		a=anota.getName().toString();
+		return true;
+	}
+	
+	public boolean visit(MethodDeclaration anota){
+		if(!anota.parameters().isEmpty()) {
+			parametros = anota.parameters();
+		}
+		metodo = anota.getName().toString();
 		return true;
 	}
 	
 	@Override
     public boolean visit(IfStatement ifStatement) {
+		String operando = "";
 		try{
 			InfixExpression e = (InfixExpression) ifStatement.getExpression();
 			if(e.getLeftOperand().resolveTypeBinding().isEnum()
@@ -55,6 +72,7 @@ public class DependencyVisitor extends ASTVisitor {
 				if(arrayIf==null){
 					arrayIf = new ArrayList<IfStatement>();
 				}
+				operando = e.getLeftOperand().toString();
 				arrayIf.add(ifStatement);
 			}
 			
@@ -67,6 +85,7 @@ public class DependencyVisitor extends ASTVisitor {
 				arrayIf.add(ifStatement);
 			}		
 		}
+		classe = new Classes(metodo, a, parametros);
 		return true;
 	}
 	
