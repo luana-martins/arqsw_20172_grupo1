@@ -36,7 +36,7 @@ public class PadraoDeProjeto {
 			System.out.println("public class "+param.getNomeEnum().get(i)+" implements "+param.getNomeMetodo()+" {\n\t");
 		}
 //		metodo += "public ";
-//  	metodo+= int;
+//  	metodo+= intPegar;
 //		metodo+= " ";
 //		metodo+= classe.getMetodo();
 //		metodo+="(";
