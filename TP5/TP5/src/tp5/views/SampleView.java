@@ -4,10 +4,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.*;
 
-import tp5.handlers.DadosDoProjeto;
 import tp5.handlers.SampleHandler;
+import tp5.handlers.Violacao;
 
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.*;
@@ -29,15 +28,15 @@ public class SampleView extends ViewPart {
 		parent.setLayout(layout);
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
-		String[] titles = { "Método", "Pacote/Classe"};
-		int[] bounds = { 150, 200};
+		String[] titles = { "Classe Violada", "Classe Violadora", "Método Violador"};
+		int[] bounds = { 150, 200, 200};
 
 		TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0);
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				MethodDeclaration m = (MethodDeclaration) element;
-				return m.getName().toString();
+				Violacao v = (Violacao) element;
+				return v.getClasseViolada();
 			}
 		});
 
@@ -45,8 +44,17 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				MethodDeclaration m = (MethodDeclaration) element;
-				return m.getParent().toString();
+				Violacao v = (Violacao) element;
+				return v.getClasseVioladora();
+			}
+		});
+		
+		col = createTableViewerColumn(titles[2], bounds[2], 2);
+		col.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Violacao v = (Violacao) element;
+				return v.getMetodoViolador();
 			}
 		});
 
@@ -97,9 +105,9 @@ public class SampleView extends ViewPart {
 		doubleClickAction = new Action() {
 			public void run() {
 				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-			//	DadosDoProjeto dados = (DadosDoProjeto) selection.getFirstElement();
+				Violacao v = (Violacao) selection.getFirstElement();
 				
-			//	MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação", dados.getDeclaracaoDoMetodo());
+				MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação", v.getMessage());
 
 				
 

@@ -2,8 +2,6 @@ package tp5.handlers;
 
 import java.util.ArrayList;
 
-
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jface.text.BadLocationException;
 
 
@@ -33,7 +31,7 @@ import org.eclipse.jface.viewers.TreeSelection;
 @SuppressWarnings("restriction")
 public class SampleHandler extends AbstractHandler {
 
-	public static ArrayList<MethodDeclaration> arrayDados;
+	public static ArrayList<Violacao> arrayDados;
 	public static ExecutionEvent event;
 	protected ArrayList<Integer> statements;
 	public static String pacote = "";
@@ -44,7 +42,7 @@ public class SampleHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		dadosProjeto = new ArrayList<DadosDoProjeto>();
 		SampleHandler.event = event;
-		arrayDados= new ArrayList<MethodDeclaration>();
+		arrayDados= new ArrayList<Violacao>();
 		
 		hideView();
 		
@@ -58,7 +56,7 @@ public class SampleHandler extends AbstractHandler {
 		PadraoArquitetural pa = new PadraoArquitetural();
 		//pa.print();
 		pa.popular();
-		pa.conferirConversa();
+		arrayDados = pa.conferirConversa();
 		openView();
 		return null;
 	}
@@ -84,7 +82,7 @@ public class SampleHandler extends AbstractHandler {
 	private void metodoInfo(ICompilationUnit unit) throws JavaModelException, BadLocationException {
 		try{
 			DependencyVisitor dp = new DependencyVisitor(unit);
-			arrayDados.addAll(dp.getArrayMethod());
+			//arrayDados.addAll(dp.getArrayMethod());
 			pacote = dp.getPack();
 		}catch(NullPointerException e){
 			e.printStackTrace();
