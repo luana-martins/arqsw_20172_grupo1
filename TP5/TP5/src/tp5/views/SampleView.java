@@ -7,6 +7,7 @@ import org.eclipse.ui.part.*;
 import tp5.handlers.DadosDoProjeto;
 import tp5.handlers.SampleHandler;
 
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.*;
@@ -35,8 +36,8 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				DadosDoProjeto m = (DadosDoProjeto) element;
-				return m.getNomeDoMetodo();
+				MethodDeclaration m = (MethodDeclaration) element;
+				return m.getName().toString();
 			}
 		});
 
@@ -44,8 +45,8 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				DadosDoProjeto m = (DadosDoProjeto) element;
-				return m.getNomeDaClasse();
+				MethodDeclaration m = (MethodDeclaration) element;
+				return m.getParent().toString();
 			}
 		});
 
@@ -96,9 +97,9 @@ public class SampleView extends ViewPart {
 		doubleClickAction = new Action() {
 			public void run() {
 				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-				DadosDoProjeto dados = (DadosDoProjeto) selection.getFirstElement();
+			//	DadosDoProjeto dados = (DadosDoProjeto) selection.getFirstElement();
 				
-				MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação", dados.getDeclaracaoDoMetodo());
+			//	MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação", dados.getDeclaracaoDoMetodo());
 
 				
 
