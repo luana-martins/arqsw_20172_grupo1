@@ -1,11 +1,12 @@
 package tp4.views;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.*;
 import tp4.handlers.SampleHandler;
 
-import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jface.action.Action;
+import org.eclipse.jdt.core.dom.IfStatement;import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -25,7 +26,7 @@ public class SampleView extends ViewPart {
 		parent.setLayout(layout);
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
-		String[] titles = { "Método", "Pacote/Classe"};
+		String[] titles = { "Expressão", "Localização"};
 		int[] bounds = { 150, 200};
 
 		TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0);
@@ -33,7 +34,7 @@ public class SampleView extends ViewPart {
 			@Override
 			public String getText(Object element) {
 				IfStatement i = (IfStatement) element;
-				return i.toString();
+				return i.getExpression().toString();
 			}
 		});
 
@@ -42,7 +43,7 @@ public class SampleView extends ViewPart {
 			@Override
 			public String getText(Object element) {
 				IfStatement i = (IfStatement) element;
-				return i.getExpression().toString();
+				return i.toString();
 			}
 		});
 
@@ -92,11 +93,10 @@ public class SampleView extends ViewPart {
 	
 		doubleClickAction = new Action() {
 			public void run() {
-				/*IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-				DadosDoProjeto dados = (DadosDoProjeto) selection.getFirstElement();
+				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+				IfStatement dados = (IfStatement) selection.getFirstElement();
 				
-				MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação", dados.getDeclaracaoDoMetodo());
-*/
+				MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Strategy", "Criar classe para enumerado encontrado em:\n"+dados.getExpression());
 				
 
 			}

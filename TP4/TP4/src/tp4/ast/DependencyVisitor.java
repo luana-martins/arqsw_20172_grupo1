@@ -25,8 +25,7 @@ public class DependencyVisitor extends ASTVisitor {
 	@SuppressWarnings("deprecation")
 	public DependencyVisitor(ICompilationUnit unit) throws JavaModelException {
 		
-			ASTParser parser = ASTParser.newParser(AST.JLS4); // It was JSL3, but it
-			// is now deprecated
+			ASTParser parser = ASTParser.newParser(AST.JLS4); 
 			parser.setKind(ASTParser.K_COMPILATION_UNIT);
 			parser.setSource(unit);
 			parser.setCompilerOptions(JavaCore.getOptions());
@@ -34,7 +33,7 @@ public class DependencyVisitor extends ASTVisitor {
 			parser.setResolveBindings(true);
 			parser.setBindingsRecovery(true);
 			
-			this.fullClass = (CompilationUnit) parser.createAST(null);// parse
+			this.fullClass = (CompilationUnit) parser.createAST(null);
 			this.fullClass.accept(this);
 	}
 	
@@ -44,8 +43,6 @@ public class DependencyVisitor extends ASTVisitor {
 	
 	@Override
     public boolean visit(IfStatement ifStatement) {
-		System.out.println(ifStatement);
-		System.out.println(ifStatement.getExpression());
 		try{
 			InfixExpression e = (InfixExpression) ifStatement.getExpression();
 			if(e.getLeftOperand().resolveTypeBinding().isEnum()
