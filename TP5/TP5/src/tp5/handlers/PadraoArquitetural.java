@@ -51,8 +51,10 @@ public class PadraoArquitetural {
 						if(violacoes == null){
 							violacoes = new ArrayList<Violacao>();
 						}
-						violacoes.add(new Violacao(v.get(j), dados.get(i).getNomeClasse(), null));
-						System.out.println("A classe "+dados.get(i).getNomeClasse()+" instancia um objeto "+v.get(j));
+						violacoes.add(new Violacao(v.get(j), dados.get(i).getNomeClasse(), dados.get(i).getNomeMetodo()));
+						System.out.println("O método '"+dados.get(i).getNomeMetodo()+
+								"' pertencente a classe '"+dados.get(i).getNomeClasse()+
+								"' não pode instanciar um objeto de '"+v.get(j)+"'");
 					}
 				}
 				for(int j = 0; j < c.size();j++) {

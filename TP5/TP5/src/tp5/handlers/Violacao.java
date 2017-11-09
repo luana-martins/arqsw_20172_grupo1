@@ -24,12 +24,8 @@ public class Violacao {
 	}
 	
 	public String getMessage(){
-		if(metodoViolador == null){
-			return "A classe "+classeVioladora+" instancia um objeto "+classeViolada;
-		} else {
-			return "O método '"+metodoViolador+
-					"' pertencente a classe '"+classeVioladora+
-					"' não pode instanciar um objeto de '"+classeViolada+"'";
-		}
+		return "O método '"+metodoViolador+
+				"' pertencente a classe '"+classeVioladora+
+				"' não pode instanciar um objeto de '"+classeViolada+"'";
 	}
 }
