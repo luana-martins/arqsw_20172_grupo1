@@ -3,26 +3,16 @@ package tp5.handlers;
 import java.util.ArrayList;
 
 public class PadraoArquitetural {
-	private  ArrayList<DadosDoProjeto> dados = SampleHandler.dadosProjeto;
+	private  ArrayList<DadosMetodo> dados = SampleHandler.dadosProjeto;
 	private ArrayList<String>c;
 	private ArrayList<String>v;
 	private ArrayList<String>m;
-	
-	
-	public void print(){
-		
-		for(int i = 0; i < dados.size(); i++){
-			System.out.println("pack: "+dados.get(i).getPacote());
-			System.out.println("node "+dados.get(i).getMetodos());
-			System.out.println("Classe: "+dados.get(i).getNomeClasse());
-			System.out.println("Metodo: "+dados.get(i).getNomeMetodo());
-		}
-	}
-	
+
 	public void popular(){
 		c = new ArrayList<String>();
 		v = new ArrayList<String>();
 		m = new ArrayList<String>();
+		
 		for(int i = 0; i < dados.size(); i++){
 			if(dados.get(i).getPacote().endsWith(".controller")) {
 				if(!c.contains(dados.get(i).getNomeClasse())) {
@@ -41,36 +31,71 @@ public class PadraoArquitetural {
 			}
 		}
 	}
-	
+
 	public ArrayList<Violacao> conferirConversa() {
-		ArrayList<Violacao> violacoes = null;
+		ArrayList<Violacao> violacoes = null;  
 		for(int i = 0; i < dados.size();i++) {
 			if(dados.get(i).getPacote().endsWith(".model")) {
+				// View
 				for(int j = 0; j < v.size();j++) {
+					if(violacoes==null) {
+						violacoes = new ArrayList<Violacao>();
+					}
+
+					// Verificar instancia de objetos Controller
 					if(dados.get(i).getMetodos().toString().contains("new "+v.get(j))) {
-						if(violacoes == null){
-							violacoes = new ArrayList<Violacao>();
+						violacoes.add(new Violacao(1,v.get(j), dados.get(i).getNomeClasse(), dados.get(i).getNomeMetodo()));
+					}
+
+					// Verificar declaração e instanciacao de atributos
+					for(int k = 0; k < dados.get(i).getClasse().size(); k++) {
+						if(dados.get(i).getClasse().get(k).getTipo().contains(v.get(j))) {
+							violacoes.add(new Violacao(2, v.get(j), dados.get(i).getNomeClasse(), null));
+
+							// Verificar se foi instanciado
+							if(dados.get(i).getClasse().get(k).getNome().contains("=new")) {
+								violacoes.add(new Violacao(1, v.get(j), dados.get(i).getNomeClasse(), null));
+							}
 						}
-						violacoes.add(new Violacao(v.get(j), dados.get(i).getNomeClasse(), dados.get(i).getNomeMetodo()));
-						System.out.println("O método '"+dados.get(i).getNomeMetodo()+
-								"' pertencente a classe '"+dados.get(i).getNomeClasse()+
-								"' não pode instanciar um objeto de '"+v.get(j)+"'");
+					}
+
+					// Verificar parametros 
+					if(dados.get(i).getParametros().toString().contains(v.get(j))) {
+						violacoes.add(new Violacao(3, v.get(j), dados.get(i).getNomeClasse(), dados.get(i).getNomeMetodo()));
 					}
 				}
+
+				// Controller
 				for(int j = 0; j < c.size();j++) {
-					if(dados.get(i).getMetodos().toString().contains("new "+c.get(j))) {
-						if(violacoes == null){
-							violacoes = new ArrayList<Violacao>();
-						}
-						violacoes.add(new Violacao(c.get(j), dados.get(i).getNomeClasse(), dados.get(i).getNomeMetodo()));
-						System.out.println("O método '"+dados.get(i).getNomeMetodo()+
-								"' pertencente a classe '"+dados.get(i).getNomeClasse()+
-								"' não pode instanciar um objeto de '"+c.get(j)+"'");
+					if(violacoes==null) {
+						violacoes = new ArrayList<Violacao>();
 					}
+
+					// Verificar instancia de objetos Controller
+					if(dados.get(i).getMetodos().toString().contains("new "+c.get(j))) {
+						violacoes.add(new Violacao(1,c.get(j), dados.get(i).getNomeClasse(), dados.get(i).getNomeMetodo()));
+					}
+
+					// Verificar declaração e instanciacao de atributos
+					for(int k = 0; k < dados.get(i).getClasse().size(); k++) {
+						if(dados.get(i).getClasse().get(k).getTipo().contains(c.get(j))) {
+							violacoes.add(new Violacao(2, c.get(j), dados.get(i).getNomeClasse(), null));
+
+							// Verificar se foi instanciado
+							if(dados.get(i).getClasse().get(k).getNome().contains("=new")) {
+								violacoes.add(new Violacao(1, c.get(j), dados.get(i).getNomeClasse(), null));
+							}
+						}
+					}
+
+					// Verificar parametros 
+					if(dados.get(i).getParametros().toString().contains(c.get(j))) {
+						violacoes.add(new Violacao(3, c.get(j), dados.get(i).getNomeClasse(), dados.get(i).getNomeMetodo()));
+					}
+
 				}
 			}
 		}
-		
 		return violacoes;
 	}
 }

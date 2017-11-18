@@ -36,11 +36,11 @@ public class SampleHandler extends AbstractHandler {
 	protected ArrayList<Integer> statements;
 	public static String pacote = "";
 	public static Boolean anot;
-	public static ArrayList<DadosDoProjeto> dadosProjeto;
+	public static ArrayList<DadosMetodo> dadosProjeto;
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		dadosProjeto = new ArrayList<DadosDoProjeto>();
+		dadosProjeto = new ArrayList<DadosMetodo>();
 		SampleHandler.event = event;
 		arrayDados= new ArrayList<Violacao>();
 		
