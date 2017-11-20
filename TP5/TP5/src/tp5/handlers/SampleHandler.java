@@ -2,8 +2,6 @@ package tp5.handlers;
 
 import java.util.ArrayList;
 
-import org.eclipse.jface.text.BadLocationException;
-
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -33,9 +31,6 @@ public class SampleHandler extends AbstractHandler {
 
 	public static ArrayList<Violacao> arrayDados;
 	public static ExecutionEvent event;
-	protected ArrayList<Integer> statements;
-	public static String pacote = "";
-	public static Boolean anot;
 	public static ArrayList<DadosMetodo> dadosProjeto;
 	
 	@Override
@@ -54,7 +49,6 @@ public class SampleHandler extends AbstractHandler {
 			e.printStackTrace();
 		}	
 		PadraoArquitetural pa = new PadraoArquitetural();
-		//pa.print();
 		pa.popular();
 		arrayDados = pa.conferirConversa();
 		openView();
@@ -68,25 +62,11 @@ public class SampleHandler extends AbstractHandler {
 			public boolean visit(IResource resource) throws JavaModelException {
 				if (resource instanceof IFile && resource.getName().endsWith(".java")) {
 					ICompilationUnit unit = ((ICompilationUnit) JavaCore.create((IFile) resource));
-					try {
-						metodoInfo(unit);
-					} catch (BadLocationException e) {
-						e.printStackTrace();
-					}
+					DependencyVisitor dp = new DependencyVisitor(unit);
 				}
 				return true;
 			}
 		});
-	}
-
-	private void metodoInfo(ICompilationUnit unit) throws JavaModelException, BadLocationException {
-		try{
-			DependencyVisitor dp = new DependencyVisitor(unit);
-			//arrayDados.addAll(dp.getArrayMethod());
-			pacote = dp.getPack();
-		}catch(NullPointerException e){
-			e.printStackTrace();
-		}
 	}
 
 	private IProject getProjectFromWorkspace(ExecutionEvent event) {

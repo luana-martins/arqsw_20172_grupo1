@@ -81,8 +81,4 @@ public class DependencyVisitor extends ASTVisitor {
 		SampleHandler.dadosProjeto.add(dados);
 		return true;
 	}
-
-	public String getPack(){
-		return pacote;
-	}
 }
