@@ -5,7 +5,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.*;
 
 import tp6.handlers.SampleHandler;
-import tp6.handlers.Violacao;
+import tp6.persistence.Violacao;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -66,7 +66,7 @@ public class SampleView extends ViewPart {
 
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
 
-		viewer.setInput(SampleHandler.arrayDados);
+		//viewer.setInput(SampleHandler.arrayDados);
 		getSite().setSelectionProvider(viewer);
 
 		GridData gridData = new GridData();
@@ -107,7 +107,7 @@ public class SampleView extends ViewPart {
 				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 				Violacao v = (Violacao) selection.getFirstElement();
 				
-				MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação", v.getMessage());
+				//MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação", v.getMessage());
 
 				
 

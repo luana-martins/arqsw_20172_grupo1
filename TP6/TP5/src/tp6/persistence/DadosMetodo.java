@@ -1,8 +1,7 @@
-package tp6.handlers;
+package tp6.persistence;
 
 import java.util.ArrayList;
 
-import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 public class DadosMetodo {

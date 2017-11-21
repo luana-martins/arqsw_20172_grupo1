@@ -1,12 +1,14 @@
-package tp6.handlers;
+package tp6.persistence;
 
 import java.util.ArrayList;
 
+import tp6.handlers.SampleHandler;
+
 public class PadraoArquitetural {
 	private  ArrayList<DadosMetodo> dados = SampleHandler.dadosProjeto;
-	private ArrayList<String>c;
-	private ArrayList<String>v;
-	private ArrayList<String>m;
+	private ArrayList<String> c;
+	private ArrayList<String> v;
+	private ArrayList<String> m;
 
 	public void popular(){
 		c = new ArrayList<String>();

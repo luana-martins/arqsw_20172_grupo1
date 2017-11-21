@@ -1,4 +1,4 @@
-package tp6.handlers;
+package tp6.persistence;
 
 public class DadosDeclaracao {
 	

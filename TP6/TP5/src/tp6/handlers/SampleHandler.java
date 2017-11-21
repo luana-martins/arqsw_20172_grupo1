@@ -2,7 +2,6 @@ package tp6.handlers;
 
 import java.util.ArrayList;
 
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -12,7 +11,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
-
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.ui.IViewPart;
@@ -22,6 +21,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import tp6.ast.DependencyVisitor;
+import tp6.persistence.DadosMetodo;
+import tp6.persistence.Violacao;
+import tp6.refactorings.MoveClass;
+
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -32,30 +35,89 @@ public class SampleHandler extends AbstractHandler {
 	public static ArrayList<Violacao> arrayDados;
 	public static ExecutionEvent event;
 	public static ArrayList<DadosMetodo> dadosProjeto;
-	
+	public ArrayList<String> pacotes;
+	public ArrayList<IType> classes;
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		dadosProjeto = new ArrayList<DadosMetodo>();
-		SampleHandler.event = event;
-		arrayDados= new ArrayList<Violacao>();
-		
-		hideView();
-		
-		IProject iProject = getProjectFromWorkspace(event);
-
 		try {
-			getMethods(iProject);
+			dadosProjeto = new ArrayList<DadosMetodo>();
+			SampleHandler.event = event;
+			arrayDados = new ArrayList<Violacao>();
+			pacotes = new ArrayList<String>();
+			classes = new ArrayList<IType>();
+
+			hideView();
+
+			IProject iProject = getProjectFromWorkspace(event);
+			if(iProject == null){
+				return null;
+			}
+			
+			IJavaProject javaProject = JavaCore.create(iProject);
+
+			getClasses(iProject);
+			
+			if(pacotes.size() > 1){
+				MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Informação", "Projeto possui mais de um pacote");
+				return null;
+			}
+
+			createArchMVC(javaProject);
+			
+			redistributeClasses(javaProject);
+			
+			openView();
+			
+
+		} catch (JavaModelException e) {
+			e.printStackTrace();
 		} catch (CoreException e) {
 			e.printStackTrace();
-		}	
-		PadraoArquitetural pa = new PadraoArquitetural();
-		pa.popular();
-		arrayDados = pa.conferirConversa();
-		openView();
+		}
+
 		return null;
 	}
+	
+	private void redistributeClasses(IJavaProject javaProject) throws JavaModelException {
+		MoveClass mc = new MoveClass();
+		IPackageFragment[] packages = javaProject.getPackageFragments();
+		for(int i=0; i<packages.length; i++){
+			
+			
+			if(packages[i].getElementName().compareTo("model") == 0){
+				mc.performMoveClassRefactoring(classes.get(0), packages[i]);
+			}
+			
+			if(packages[i].getElementName().compareTo("view") == 0){
+				mc.performMoveClassRefactoring(classes.get(1), packages[i]);
+			}
+			
+			if(packages[i].getElementName().compareTo("controller") == 0){
+				mc.performMoveClassRefactoring(classes.get(2), packages[i]);
+			}
+		}
+		
+		
+	}
+	
+	private void createArchMVC(IJavaProject javaProject) throws JavaModelException{
+		IPackageFragmentRoot packageSrc = null;
+		IPackageFragmentRoot[] pfr = javaProject.getAllPackageFragmentRoots();
+		for (int i = 0; i < pfr.length; i++) {
+			if (pfr[i].getElementName().compareTo("src") == 0) {
+				packageSrc = pfr[i];
+				break;
+			}
+		}
+		
+		packageSrc.createPackageFragment("model", true, new NullProgressMonitor());
+		packageSrc.createPackageFragment("view", true, new NullProgressMonitor());
+		packageSrc.createPackageFragment("controller", true, new NullProgressMonitor());
 
-	private void getMethods(final IProject project) throws CoreException {
+	}
+
+	private void getClasses(final IProject project) throws CoreException {
 		project.accept(new IResourceVisitor() {
 
 			@Override
@@ -63,6 +125,12 @@ public class SampleHandler extends AbstractHandler {
 				if (resource instanceof IFile && resource.getName().endsWith(".java")) {
 					ICompilationUnit unit = ((ICompilationUnit) JavaCore.create((IFile) resource));
 					DependencyVisitor dp = new DependencyVisitor(unit);
+					if(!pacotes.contains(dp.getPacote())){
+						pacotes.add(dp.getPacote());
+					}
+					
+					classes.add(dp.getClazz());
+					
 				}
 				return true;
 			}
