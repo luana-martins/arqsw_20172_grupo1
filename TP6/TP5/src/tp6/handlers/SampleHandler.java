@@ -24,6 +24,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import tp6.ast.DependencyVisitor;
 import tp6.persistence.DadosMetodo;
+import tp6.persistence.DadosRemodularizar;
 import tp6.persistence.Violacao;
 import tp6.refactorings.MoveClass;
 
@@ -38,7 +39,8 @@ public class SampleHandler extends AbstractHandler {
 	public static ExecutionEvent event;
 	public static ArrayList<DadosMetodo> dadosProjeto;
 	public ArrayList<String> pacotes;
-	public ArrayList<IType> classes;
+	public ArrayList<DadosRemodularizar> dadosNovaArq;
+	
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -47,7 +49,7 @@ public class SampleHandler extends AbstractHandler {
 			SampleHandler.event = event;
 			arrayDados = new ArrayList<Violacao>();
 			pacotes = new ArrayList<String>();
-			classes = new ArrayList<IType>();
+			dadosNovaArq = new ArrayList<DadosRemodularizar>();
 
 			hideView();
 
@@ -65,9 +67,10 @@ public class SampleHandler extends AbstractHandler {
 				return null;
 			}
 
-		//	createArchMVC(javaProject);
+			createArchMVC(javaProject);
 			
-		//	redistributeClasses(javaProject);
+			redistributeClasses(javaProject);
+			
 //			for(int i = 0; i < DependencyVisitor.mapaRemodularizacao.size();i++) {
 //				if(DependencyVisitor.mapaRemodularizacao.containsKey("view")) {
 //					System.out.println(DependencyVisitor.mapaRemodularizacao.values());
@@ -87,20 +90,33 @@ public class SampleHandler extends AbstractHandler {
 	}
 	
 	private void redistributeClasses(IJavaProject javaProject) throws JavaModelException {
+		
 		MoveClass mc = new MoveClass();
 		IPackageFragment[] packages = javaProject.getPackageFragments();
 		for(int i=0; i<packages.length; i++){
 			
 			if(packages[i].getElementName().compareTo("model") == 0){
-				mc.performMoveClassRefactoring(classes.get(0), packages[i]);
+				for(int j=0;j<dadosNovaArq.size();j++){
+					if(dadosNovaArq.get(j).getTipoPacote().compareTo("model") == 0){
+						mc.performMoveClassRefactoring(dadosNovaArq.get(j).getClasse(), packages[i]);
+					}
+				}
 			}
 			
 			if(packages[i].getElementName().compareTo("view") == 0){
-				mc.performMoveClassRefactoring(classes.get(1), packages[i]);
+				for(int j=0;j<dadosNovaArq.size();j++){
+					if(dadosNovaArq.get(j).getTipoPacote().compareTo("view") == 0){
+						mc.performMoveClassRefactoring(dadosNovaArq.get(j).getClasse(), packages[i]);
+					}
+				}
 			}
 			
 			if(packages[i].getElementName().compareTo("controller") == 0){
-				mc.performMoveClassRefactoring(classes.get(2), packages[i]);
+				for(int j=0;j<dadosNovaArq.size();j++){
+					if(dadosNovaArq.get(j).getTipoPacote().compareTo("controller") == 0){
+						mc.performMoveClassRefactoring(dadosNovaArq.get(j).getClasse(), packages[i]);
+					}
+				}
 			}
 		}
 		
@@ -135,7 +151,7 @@ public class SampleHandler extends AbstractHandler {
 						pacotes.add(dp.getPacote());
 					}
 					
-					classes.add(dp.getClazz());
+					dadosNovaArq.add(dp.getDados());
 					
 				}
 				return true;

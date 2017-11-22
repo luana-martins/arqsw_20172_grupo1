@@ -1,27 +1,23 @@
 package tp6.persistence;
 
-import java.util.ArrayList;
 
-import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.IType;
 
 public class DadosRemodularizar {
-	String chave;
-	CompilationUnit classes;
-	public String getChave() {
-		return chave;
+	private String tipoPacote;
+	private IType classe;
+	
+	public DadosRemodularizar(String tipoPacote, IType classe) {
+		this.tipoPacote = tipoPacote;
+		this.classe = classe;
 	}
-	public void setChave(String chave) {
-		this.chave = chave;
+	
+	public String getTipoPacote(){
+		return tipoPacote;
 	}
-	public CompilationUnit getClasses() {
-		return classes;
+
+	public IType getClasse() {
+		return classe;
 	}
-	public void setClasses(CompilationUnit classes) {
-		this.classes = classes;
-	}
-	public DadosRemodularizar(String chave, CompilationUnit classes) {
-		super();
-		this.chave = chave;
-		this.classes = classes;
-	}
+	
 }
