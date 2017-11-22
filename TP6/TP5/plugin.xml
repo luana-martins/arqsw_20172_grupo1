@@ -56,7 +56,7 @@
             class="tp6.views.SampleView"
             icon="icons/pokeball.png"
             id="tp1.views.SampleView"
-            name="Métodos">
+            name="Resultados">
       </view>
    </extension>
    <extension
@@ -69,6 +69,9 @@
                relationship="right"
                relative="org.eclipse.ui.views.ProblemView">
          </view>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
       </perspectiveExtension>
    </extension>
    <extension

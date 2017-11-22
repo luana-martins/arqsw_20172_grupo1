@@ -9,22 +9,18 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import tp6.persistence.DadosRemodularizar;
-
 
 public class DependencyVisitor extends ASTVisitor {
 
 	private CompilationUnit fullClass;
 	private String pacote;
-	private IType clazz;
 	private DadosRemodularizar dados;
 
-
 	public DependencyVisitor(ICompilationUnit unit) throws JavaModelException {
-		ASTParser parser = ASTParser.newParser(AST.JLS8); 
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setSource(unit);
 		parser.setCompilerOptions(JavaCore.getOptions());
@@ -34,53 +30,41 @@ public class DependencyVisitor extends ASTVisitor {
 
 		this.fullClass = (CompilationUnit) parser.createAST(null);// parse
 		this.fullClass.accept(this);
-		
+
 	}
 
 	@Override
-	public boolean visit(TypeDeclaration anota){
-		
+	public boolean visit(TypeDeclaration anota) {
+
 		IType iType = (IType) anota.resolveBinding().getJavaElement();
-		
+
 		try {
-			
-			ITypeHierarchy th= iType.newTypeHierarchy(null);
-			System.out.println(th);
-			
-			if((th.toString().contains("Window")) || (th.getAllTypes().toString().contains("Frame"))) {
+
+			ITypeHierarchy th = iType.newTypeHierarchy(null);
+
+			if ((th.toString().contains("Window")) || (th.getAllTypes().toString().contains("Frame"))) {
 				dados = new DadosRemodularizar("view", iType);
-			}if((th.toString().contains("ActionListener")) && (th.toString().contains("EventListener"))) {
+			} else if ((th.toString().contains("ActionListener")) && (th.toString().contains("EventListener"))) {
 				dados = new DadosRemodularizar("controller", iType);
-			}if((th.toString().contains("EventObject"))|| (th.toString().contains("Adapter"))) {
+			} else if ((th.toString().contains("EventObject")) || (th.toString().contains("Adapter"))) {
 				dados = new DadosRemodularizar("model", iType);
+			} else {
+				dados = new DadosRemodularizar(iType.getPackageFragment().getElementName() + " (atual)", iType);
 			}
-			
+
 		} catch (JavaModelException e) {
 			e.printStackTrace();
 		}
-		
+
 		pacote = iType.getPackageFragment().getElementName();
-		clazz = iType;
 		return true;
 	}
 
-	@Override
-	public boolean visit(ImportDeclaration node){
-
-		//Imports packages
-		//System.out.println(node);
-		return true;
-	}
-
-	public String getPacote(){
+	public String getPacote() {
 		return pacote;
 	}
 
-	public IType getClazz() {
-		return clazz;
-	}
-	
-	public DadosRemodularizar getDados(){
+	public DadosRemodularizar getDados() {
 		return dados;
 	}
 
