@@ -44,11 +44,14 @@ public class DependencyVisitor extends ASTVisitor {
 
 			if ((th.toString().contains("Window")) || (th.getAllTypes().toString().contains("Frame"))) {
 				dados = new DadosRemodularizar("view", iType);
-			} else if ((th.toString().contains("ActionListener")) && (th.toString().contains("EventListener"))) {
+			} else if (((th.toString().contains("ActionListener")) || (th.toString().contains("ChangeListener"))) && (th.toString().contains("EventListener"))) {
 				dados = new DadosRemodularizar("controller", iType);
 			} else if ((th.toString().contains("EventObject")) || (th.toString().contains("Adapter"))) {
 				dados = new DadosRemodularizar("model", iType);
-			} else {
+			} else if((th.getAllSupertypes(iType).length==1) && (th.toString().contains("Object"))) {
+				dados = new DadosRemodularizar("model", iType);
+			}
+			else {
 				dados = new DadosRemodularizar(iType.getPackageFragment().getElementName() + " (atual)", iType);
 			}
 

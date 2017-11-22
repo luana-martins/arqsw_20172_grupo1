@@ -257,6 +257,5 @@ public class SampleView extends ViewPart {
 		packageSrc.createPackageFragment("model", true, new NullProgressMonitor());
 		packageSrc.createPackageFragment("view", true, new NullProgressMonitor());
 		packageSrc.createPackageFragment("controller", true, new NullProgressMonitor());
-
 	}
 }

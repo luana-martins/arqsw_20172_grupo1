@@ -18,10 +18,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class MoveClass {
 
-	public void performMoveClassRefactoring(IType origem, IPackageFragment destino) {
-
-	
-		
+	public void performMoveClassRefactoring(IType origem, IPackageFragment destino) {	
 		RefactoringContribution contribution2 = RefactoringCore.getRefactoringContribution(IJavaRefactorings.MOVE);
 		MoveDescriptor descriptor2 = (MoveDescriptor) contribution2.createDescriptor();
 		descriptor2.setMoveResources(new IFile[0],new IFolder[0],new ICompilationUnit[]{origem.getCompilationUnit()});
