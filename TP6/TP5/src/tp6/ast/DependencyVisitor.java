@@ -47,12 +47,12 @@ public class DependencyVisitor extends ASTVisitor {
 			ITypeHierarchy th= iType.newTypeHierarchy(null);
 			System.out.println(th);
 			
-			if(th.toString().contains("ActionListener")) {
-				if(th.toString().contains("Window") || th.getAllTypes().toString().contains("Frame")){
-					dados = new DadosRemodularizar("view", iType);
-				}if(th.toString().contains("EventListener")) {
-					dados = new DadosRemodularizar("controller", iType);
-				}
+			if((th.toString().contains("Window")) || (th.getAllTypes().toString().contains("Frame"))) {
+				dados = new DadosRemodularizar("view", iType);
+			}if((th.toString().contains("ActionListener")) && (th.toString().contains("EventListener"))) {
+				dados = new DadosRemodularizar("controller", iType);
+			}if((th.toString().contains("EventObject"))|| (th.toString().contains("Adapter"))) {
+				dados = new DadosRemodularizar("model", iType);
 			}
 			
 		} catch (JavaModelException e) {
