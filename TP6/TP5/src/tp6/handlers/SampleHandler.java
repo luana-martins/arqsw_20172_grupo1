@@ -1,6 +1,7 @@
 package tp6.handlers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -13,6 +14,7 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -63,10 +65,15 @@ public class SampleHandler extends AbstractHandler {
 				return null;
 			}
 
-			createArchMVC(javaProject);
+		//	createArchMVC(javaProject);
 			
-			redistributeClasses(javaProject);
-			
+		//	redistributeClasses(javaProject);
+//			for(int i = 0; i < DependencyVisitor.mapaRemodularizacao.size();i++) {
+//				if(DependencyVisitor.mapaRemodularizacao.containsKey("view")) {
+//					System.out.println(DependencyVisitor.mapaRemodularizacao.values());
+//				}
+//			}
+				
 			openView();
 			
 
@@ -83,7 +90,6 @@ public class SampleHandler extends AbstractHandler {
 		MoveClass mc = new MoveClass();
 		IPackageFragment[] packages = javaProject.getPackageFragments();
 		for(int i=0; i<packages.length; i++){
-			
 			
 			if(packages[i].getElementName().compareTo("model") == 0){
 				mc.performMoveClassRefactoring(classes.get(0), packages[i]);
