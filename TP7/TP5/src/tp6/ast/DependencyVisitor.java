@@ -1,5 +1,6 @@
 package tp6.ast;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -52,16 +54,33 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.Block;
 
-import tp6.persistence.DadosRemodularizar;
+import tp6.persistence.DadosDependencias;
+
 
 public class DependencyVisitor extends ASTVisitor {
 
 	private CompilationUnit fullClass;
+	private IType iType;
 	private String pacote;
-	private DadosRemodularizar dados;
+	private String classe;
+	private DadosDependencias dados;
 	private ICompilationUnit unit;
 	private ArrayList<Object[]> dependenciesCP;
 
+//	public ArrayList<DadosDependencias> getDependencias(){
+//		return dependenciesCP;
+//	}
+	public void getObject() {
+		for(int i = 0; i < dependenciesCP.size();i++) {
+//			System.out.println(dependenciesCP.get(i).getPacote());
+//			System.out.println(dependenciesCP.get(i).getNomeClasse());
+//			System.out.println(dependenciesCP.get(i).getDependencia());
+//			System.out.println(dependenciesCP.get(i).getClasse());
+			for(Object a: dependenciesCP.get(i)) {
+				System.out.println(a);
+			}
+		}
+	}
 	public DependencyVisitor(ICompilationUnit unit) throws JavaModelException {
 		this.dependenciesCP = new ArrayList<Object[]>();
 		this.unit = unit;
@@ -73,23 +92,31 @@ public class DependencyVisitor extends ASTVisitor {
 		parser.setResolveBindings(true);
 		parser.setBindingsRecovery(true);
 
-		this.fullClass = (CompilationUnit) parser.createAST(null);// parse
+		this.fullClass = (CompilationUnit) parser.createAST(null);
 		this.fullClass.accept(this);
+	}
+	
+	@Override
+	public boolean visit(PackageDeclaration pack) {
+		pacote = pack.getName().toString();
+		return true;
 	}
 
 	@Override
 	public boolean visit(TypeDeclaration node) {
-
+		classe = node.getName().toString();
+		iType = (IType) node.resolveBinding().getJavaElement();
 		try {
+			
 			IType type = (IType) unit.getTypes()[0];
 			ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(null);
-
 			IType[] typeSuperclasses = typeHierarchy.getAllSuperclasses(type);
 			for (IType t : typeSuperclasses) {
 				if (node.getSuperclassType() != null && t.getFullyQualifiedName()
 						.equals(node.getSuperclassType().resolveBinding().getQualifiedName())) {
-					this.dependenciesCP.add(new Object[] { t.getFullyQualifiedName() });
-					System.out.println("CLASSE  "+node.getName() + "  DEPENDE DE  " + t.getFullyQualifiedName());
+					 this.dependenciesCP.add(new Object[] { pacote, classe, t.getFullyQualifiedName(), iType});
+					//this.dependenciesCP.add(new DadosDependencias(pacote, classe, t.getFullyQualifiedName(), iType ));
+					//System.out.println("CLASSE  "+node.getName() + "  DEPENDE DE  " + t.getFullyQualifiedName());
 				}
 			}
 
@@ -100,8 +127,9 @@ public class DependencyVisitor extends ASTVisitor {
 
 					SimpleType st = (SimpleType) it;
 					if (t.getFullyQualifiedName().equals(st.getName().resolveTypeBinding().getQualifiedName())) {
-						this.dependenciesCP.add(new Object[] { t.getFullyQualifiedName() });
-						System.out.println("CLASSE  "+node.getName() + "  DEPENDE DE  " + t.getFullyQualifiedName());
+						//this.dependenciesCP.add(new DadosDependencias(pacote, classe, t.getFullyQualifiedName(), iType ));
+						 this.dependenciesCP.add(new Object[] { pacote, classe, t.getFullyQualifiedName(), iType});
+						//System.out.println("CLASSE  "+node.getName() + "  Implementa DE  " + t.getFullyQualifiedName());
 					}
 				}
 			}
@@ -114,9 +142,9 @@ public class DependencyVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(FieldDeclaration node) {
 		Type a = node.getType();
-		this.dependenciesCP.add(new Object[] { node.getType().resolveBinding().getQualifiedName() });
-		//sem pegar o tipo da lista new Object[] { this.getTargetClassName(node.getType().resolveBinding()}
-		System.out.println("ATRIBUTOS   "+ node.getType().resolveBinding().getQualifiedName());
+		 this.dependenciesCP.add(new Object[] { pacote, classe,node.getType().resolveBinding().getQualifiedName(), iType});
+		//this.dependenciesCP.add(new DadosDependencias(pacote, classe, node.getType().resolveBinding().getQualifiedName(), iType));
+	//	System.out.println("ATRIBUTOS   "+ node.getType().resolveBinding().getQualifiedName());
 		return true;
 	}
 
@@ -127,9 +155,10 @@ public class DependencyVisitor extends ASTVisitor {
 		for (Object o : node.parameters()) {
 			if (o instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration svd = (SingleVariableDeclaration) o;
-				System.out.println("PARAMETROS "+svd.getType().resolveBinding().getQualifiedName());
+			//	System.out.println("PARAMETROS "+svd.getType().resolveBinding().getQualifiedName());
 				Type b = svd.getType();
-				this.dependenciesCP.add(new Object[] {svd.getType().resolveBinding() });
+				 this.dependenciesCP.add(new Object[] { pacote, classe, svd.getType().resolveBinding().getQualifiedName(), iType});
+			//this.dependenciesCP.add(new DadosDependencias(pacote, classe, svd.getType().resolveBinding().getQualifiedName(), iType));
 			}
 		}
 		return true;
@@ -138,26 +167,16 @@ public class DependencyVisitor extends ASTVisitor {
 	
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
-
-		switch (node.getNodeType()) {
-		case ASTNode.FIELD_DECLARATION:
-			// FieldDeclaration fd = (FieldDeclaration) relevantParent;
-			this.dependenciesCP.add(new Object[] { node.getType().resolveBinding().getBinaryName() });
-		case ASTNode.METHOD_DECLARATION:
-			// MethodDeclaration md = (MethodDeclaration) relevantParent;
-			this.dependenciesCP.add(new Object[] {  node.getType().resolveBinding().getBinaryName() });
-		case ASTNode.INITIALIZER:
-			this.dependenciesCP.add(new Object[] { node.getType().resolveBinding().getBinaryName() });
-		}
-		System.out.println("INSTANCIA   "+node.getType().resolveBinding().getBinaryName());
+		this.dependenciesCP.add(new Object[] { pacote, classe,node.getType().resolveBinding().getQualifiedName(), iType});
+		//this.dependenciesCP.add(new DadosDependencias(pacote, classe, node.getType().resolveBinding().getQualifiedName(), iType ));
+	//	System.out.println("INSTANCIA   "+node.getType().resolveBinding().getQualifiedName());
 		return true;
 	}
 	
-	public String getPacote() {
+	public String getPacote(){
 		return pacote;
 	}
-
-	public DadosRemodularizar getDados() {
+	public DadosDependencias getDados() {
 		return dados;
 	}
 

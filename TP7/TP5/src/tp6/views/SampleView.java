@@ -13,7 +13,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.*;
 
 import tp6.handlers.SampleHandler;
-import tp6.persistence.DadosRemodularizar;
+import tp6.persistence.DadosDependencias;
 import tp6.refactorings.MoveClass;
 
 import javax.swing.JOptionPane;
@@ -57,7 +57,7 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				DadosRemodularizar dr = (DadosRemodularizar) element;
+				DadosDependencias dr = (DadosDependencias) element;
 				return dr.getClasse().getElementName();
 			}
 		});
@@ -66,8 +66,8 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				DadosRemodularizar dr = (DadosRemodularizar) element;
-				return dr.getTipoPacote();
+				DadosDependencias dr = (DadosDependencias) element;
+				return dr.getPacote();
 			}
 		});
 
@@ -121,11 +121,11 @@ public class SampleView extends ViewPart {
 		doubleClickAction = new Action() {
 			public void run() {
 				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-				DadosRemodularizar dr = (DadosRemodularizar) selection.getFirstElement();
-				if (dr.getTipoPacote().compareTo("view") == 0 || dr.getTipoPacote().compareTo("model") == 0
-						|| dr.getTipoPacote().compareTo("controller") == 0) {
+				DadosDependencias dr = (DadosDependencias) selection.getFirstElement();
+				if (dr.getPacote().compareTo("view") == 0 || dr.getPacote().compareTo("model") == 0
+						|| dr.getPacote().compareTo("controller") == 0) {
 					MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação",
-							"Recomenda-se a criação do pacote " + dr.getTipoPacote() + " para mover a classe "
+							"Recomenda-se a criação do pacote " + dr.getPacote() + " para mover a classe "
 									+ dr.getClasse().getElementName() + " para ele.");
 				} else {
 					MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação",
@@ -219,7 +219,7 @@ public class SampleView extends ViewPart {
 
 			if (packages[i].getElementName().compareTo("model") == 0) {
 				for (int j = 0; j < SampleHandler.dadosNovaArq.size(); j++) {
-					if (SampleHandler.dadosNovaArq.get(j).getTipoPacote().compareTo("model") == 0) {
+					if (SampleHandler.dadosNovaArq.get(j).getPacote().compareTo("model") == 0) {
 						mc.performMoveClassRefactoring(SampleHandler.dadosNovaArq.get(j).getClasse(), packages[i]);
 					}
 				}
@@ -227,7 +227,7 @@ public class SampleView extends ViewPart {
 
 			if (packages[i].getElementName().compareTo("view") == 0) {
 				for (int j = 0; j < SampleHandler.dadosNovaArq.size(); j++) {
-					if (SampleHandler.dadosNovaArq.get(j).getTipoPacote().compareTo("view") == 0) {
+					if (SampleHandler.dadosNovaArq.get(j).getPacote().compareTo("view") == 0) {
 						mc.performMoveClassRefactoring(SampleHandler.dadosNovaArq.get(j).getClasse(), packages[i]);
 					}
 				}
@@ -235,7 +235,7 @@ public class SampleView extends ViewPart {
 
 			if (packages[i].getElementName().compareTo("controller") == 0) {
 				for (int j = 0; j < SampleHandler.dadosNovaArq.size(); j++) {
-					if (SampleHandler.dadosNovaArq.get(j).getTipoPacote().compareTo("controller") == 0) {
+					if (SampleHandler.dadosNovaArq.get(j).getPacote().compareTo("controller") == 0) {
 						mc.performMoveClassRefactoring(SampleHandler.dadosNovaArq.get(j).getClasse(), packages[i]);
 					}
 				}

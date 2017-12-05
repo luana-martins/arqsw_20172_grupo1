@@ -20,7 +20,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import tp6.ast.DependencyVisitor;
-import tp6.persistence.DadosRemodularizar;
+import tp6.persistence.DadosDependencias;
+import tp6.similaridade.Similaridade;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -29,16 +30,16 @@ import org.eclipse.jface.viewers.TreeSelection;
 public class SampleHandler extends AbstractHandler {
 
 	public static ExecutionEvent event;
-	public ArrayList<String> pacotes;
-	public static ArrayList<DadosRemodularizar> dadosNovaArq;
+	public static ArrayList<DadosDependencias> dadosNovaArq;
 	public static IJavaProject javaProject;
-
+	public ArrayList<String> pacotes;
+	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
-			SampleHandler.event = event;
 			pacotes = new ArrayList<String>();
-			dadosNovaArq = new ArrayList<DadosRemodularizar>();
+			SampleHandler.event = event;
+			dadosNovaArq = new ArrayList<DadosDependencias>();
 
 			hideView();
 
@@ -49,14 +50,10 @@ public class SampleHandler extends AbstractHandler {
 
 			getClasses(iProject);
 
-			if (pacotes.size() > 1) {
-				MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Informação",
-						"Projeto possui mais de um pacote");
-				return null;
-			}
+	//		javaProject = JavaCore.create(iProject);
 
-			javaProject = JavaCore.create(iProject);
-
+		//	Similaridade si = new Similaridade(dp, pacotes);
+		//	si.similaridadeMesmoPacote();
 			openView();
 
 		} catch (JavaModelException e) {
@@ -64,7 +61,6 @@ public class SampleHandler extends AbstractHandler {
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
-
 		return null;
 	}
 
@@ -80,11 +76,11 @@ public class SampleHandler extends AbstractHandler {
 					if (!pacotes.contains(dp.getPacote())) {
 						pacotes.add(dp.getPacote());
 					}
-
+					
 					if (dp.getDados() != null) {
 						dadosNovaArq.add(dp.getDados());
 					}
-
+					dp.getObject();
 				}
 				return true;
 			}
@@ -125,5 +121,6 @@ public class SampleHandler extends AbstractHandler {
 			e.printStackTrace();
 		}
 	}
+	
 
 }
