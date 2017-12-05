@@ -7,7 +7,7 @@ public class DadosSimilaridade {
 	String classe;
 	String pacote;
 	
-	public DadosSimilaridade(ArrayList<Integer>similaridade, String pacote, String classe) {
+	public DadosSimilaridade(ArrayList<Integer>similaridade, String classe, String pacote) {
 		this.similaridade = similaridade;
 		this.classe = classe;
 		this.pacote = pacote;
@@ -15,11 +15,11 @@ public class DadosSimilaridade {
 	public ArrayList<Integer> getSimilaridade() {
 		return similaridade;
 	}
-	public String getClasse() {
-		return classe;
-	}
-	
 	public String getPacote() {
 		return pacote;
+	}
+	
+	public String getClasse() {
+		return classe;
 	}
 }

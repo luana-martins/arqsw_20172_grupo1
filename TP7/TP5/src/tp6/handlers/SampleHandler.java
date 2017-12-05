@@ -33,6 +33,8 @@ public class SampleHandler extends AbstractHandler {
 	public static ArrayList<DadosDependencias> dadosNovaArq;
 	public static IJavaProject javaProject;
 	public ArrayList<String> pacotes;
+	public DependencyVisitor dp;
+	public ArrayList<DadosDependencias> dependenciesCP = new ArrayList<DadosDependencias>();
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -52,8 +54,8 @@ public class SampleHandler extends AbstractHandler {
 
 	//		javaProject = JavaCore.create(iProject);
 
-		//	Similaridade si = new Similaridade(dp, pacotes);
-		//	si.similaridadeMesmoPacote();
+			Similaridade si = new Similaridade(dp, pacotes);
+			si.similaridadeMesmoPacote();
 			openView();
 
 		} catch (JavaModelException e) {
@@ -72,7 +74,7 @@ public class SampleHandler extends AbstractHandler {
 			public boolean visit(IResource resource) throws JavaModelException {
 				if (resource instanceof IFile && resource.getName().endsWith(".java")) {
 					ICompilationUnit unit = ((ICompilationUnit) JavaCore.create((IFile) resource));
-					DependencyVisitor dp = new DependencyVisitor(unit);
+					dp = new DependencyVisitor(unit, dependenciesCP);
 					if (!pacotes.contains(dp.getPacote())) {
 						pacotes.add(dp.getPacote());
 					}
@@ -80,7 +82,7 @@ public class SampleHandler extends AbstractHandler {
 					if (dp.getDados() != null) {
 						dadosNovaArq.add(dp.getDados());
 					}
-					dp.getObject();
+				//	dp.getObject();
 				}
 				return true;
 			}
