@@ -32,14 +32,18 @@ public class Similaridade {
 		
 	}
 	private double similaridadePSC(ArrayList<String> dependencias1, ArrayList<String> dependencias2){
-		
-		int a,b,c;
-		
-		a = calcularA(dependencias1, dependencias2);
-		b = calcularB(dependencias1, a);
-		c = calcularC(dependencias2, a);
-		
-		return (a*a)/((b+a)*(c+a));
+		try{
+			int a,b,c;
+			
+			a = calcularA(dependencias1, dependencias2);
+			b = calcularB(dependencias1, a);
+			c = calcularC(dependencias2, a);
+			
+			return (double) (a*a)/((b+a)*(c+a));
+			
+		}catch(ArithmeticException e){
+			return 0;
+		}
 	}
 
 	private int calcularC(ArrayList<String> dependencias2, int a) {

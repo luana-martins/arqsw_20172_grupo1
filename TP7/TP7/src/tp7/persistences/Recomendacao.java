@@ -3,6 +3,8 @@ package tp7.persistences;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
+import tp7.refactorings.MoveClass;
+
 public class Recomendacao {
 	private IType classe;
 	private IPackageFragment pacoteDestino;
@@ -31,6 +33,9 @@ public class Recomendacao {
 		return simPacoteDestino;
 	}
 	
-	
+	public void moverClasse(){
+		MoveClass mc = new MoveClass();
+		mc.performMoveClassRefactoring(classe, pacoteDestino);
+	}
 
 }

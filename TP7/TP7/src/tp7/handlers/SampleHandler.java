@@ -76,8 +76,8 @@ public class SampleHandler extends AbstractHandler {
 				double simMP=0;
 				IPackageFragment possivelDestino = null;
 				//Calcula a similaridade da classe com as classes do seu pacote
-				for(int i=0;i<classesPacotes.size();i++){
-					if(classesPacotes.get(classe.getPacote()) != null){
+				for (IPackageFragment pacote : classesPacotes.keySet()) {
+					if(pacote.getElementName().compareTo(classe.getPacote().getElementName())  == 0){
 						Similaridade si = new Similaridade();
 						simMP = si.similaridadeMesmoPacote(classe, classesPacotes.get(classe.getPacote()));
 						break;
@@ -86,12 +86,12 @@ public class SampleHandler extends AbstractHandler {
 				
 				double simPD=0;
 				//Calcula a similaridade da classe com as classes dos outros pacotes
-				for(int i=0;i<classesPacotes.size();i++){
-					if(classesPacotes.get(classe.getPacote()) == null){
+				for (IPackageFragment pacote : classesPacotes.keySet()) {
+					if(pacote.getElementName().compareTo(classe.getPacote().getElementName())  != 0){
 						Similaridade si = new Similaridade();
-						simPD = si.similaridadePacotesDiferentes(classe, classesPacotes.get(i));
+						simPD = si.similaridadePacotesDiferentes(classe, classesPacotes.get(pacote));
 						if(simPD > simMP){
-							possivelDestino = classesPacotes.get(i).get(i).getPacote();
+							possivelDestino = pacote;
 						}
 					}
 				}

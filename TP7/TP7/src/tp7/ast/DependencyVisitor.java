@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -50,13 +49,6 @@ public class DependencyVisitor extends ASTVisitor {
 		return true;
 	}
 
-	@Override
-	public boolean visit(ImportDeclaration pack) {
-		if (!dependencias.contains(pack.getName().toString())) {
-			dependencias.add(pack.getName().toString());
-		}
-		return true;
-	}
 
 	@Override
 	public boolean visit(TypeDeclaration node) {
@@ -69,7 +61,7 @@ public class DependencyVisitor extends ASTVisitor {
 			IType[] typeSuperclasses = typeHierarchy.getAllSuperclasses(type);
 			for (IType t : typeSuperclasses) {
 				if (node.getSuperclassType() != null && t.getFullyQualifiedName()
-						.equals(node.getSuperclassType().resolveBinding().getQualifiedName())) {
+						.equals(node.getSuperclassType().resolveBinding().getQualifiedName()) && !node.resolveBinding().isPrimitive()) {
 					if (!dependencias.contains(t.getElementName())) {
 						dependencias.add(t.getElementName());
 					}
@@ -82,7 +74,7 @@ public class DependencyVisitor extends ASTVisitor {
 				for (Object it : node.superInterfaceTypes()) {
 
 					SimpleType st = (SimpleType) it;
-					if (t.getFullyQualifiedName().equals(st.getName().resolveTypeBinding().getQualifiedName())) {
+					if (t.getFullyQualifiedName().equals(st.getName().resolveTypeBinding().getQualifiedName()) && !node.resolveBinding().isPrimitive()) {
 						if (!dependencias.contains(t.getElementName())) {
 							dependencias.add(t.getElementName());
 						}
@@ -98,7 +90,7 @@ public class DependencyVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(FieldDeclaration node) {
 
-		if (!dependencias.contains(node.getType().resolveBinding().getName()) && node.getType().isPrimitiveType()) {
+		if (!dependencias.contains(node.getType().resolveBinding().getName()) && !node.getType().isPrimitiveType()) {
 			dependencias.add(node.getType().resolveBinding().getName());
 		}
 
@@ -111,7 +103,7 @@ public class DependencyVisitor extends ASTVisitor {
 		for (Object o : node.parameters()) {
 			if (o instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration svd = (SingleVariableDeclaration) o;
-				if (!dependencias.contains(svd.getType().resolveBinding().getName())) {
+				if (!dependencias.contains(svd.getType().resolveBinding().getName()) && !svd.getType().isPrimitiveType()) {
 					dependencias.add(svd.getType().resolveBinding().getName());
 				}
 			}
@@ -121,7 +113,7 @@ public class DependencyVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
-		if (!dependencias.contains(node.getType().resolveBinding().getName())) {
+		if (!dependencias.contains(node.getType().resolveBinding().getName()) && !node.getType().isPrimitiveType()) {
 			dependencias.add(node.getType().resolveBinding().getName());
 		}
 		return true;

@@ -1,27 +1,38 @@
 package tp7.views;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.*;
-
-import tp7.handlers.SampleHandler;
-import tp7.persistences.Recomendacao;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.SWT;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.part.ViewPart;
+
+import tp7.handlers.SampleHandler;
+import tp7.persistences.Recomendacao;
 
 public class SampleView extends ViewPart {
 
@@ -37,7 +48,7 @@ public class SampleView extends ViewPart {
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
 		String[] titles = { "Classe", "Pacote Destino", "Sim. Pacote Atual", "Sim. Pacote Destino" };
-		int[] bounds = { 300, 300, 300, 300 };
+		int[] bounds = { 150, 150, 150, 150 };
 
 		TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0);
 		col.setLabelProvider(new ColumnLabelProvider() {
@@ -124,7 +135,28 @@ public class SampleView extends ViewPart {
 
 		doubleClickAction = new Action() {
 			public void run() {
-				//TODO: aplicar a refatoracao ao clicar na linha (talvez)
+				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+				Recomendacao r = (Recomendacao) selection.getFirstElement();
+				r.moverClasse();
+				MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação",
+						"Refatoração realizada com sucesso!");
+				
+				SampleHandler.recomendacoes.clear();
+				
+				IWorkbenchPage wp = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+
+				// Find desired view :
+				IViewPart myView = wp.findView("tp1.views.SampleView");
+
+				// Hide the view :
+				wp.hideView(myView);
+
+				try {
+					wp.showView("tp1.views.SampleView");
+				} catch (PartInitException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 			}
 		};
@@ -167,8 +199,6 @@ public class SampleView extends ViewPart {
 	private void makeActions() {
 		applyRemodularizationAction = new Action() {
 			public void run() {
-
-				//TODO aplicar todas as refatoracoes
 
 			}
 
