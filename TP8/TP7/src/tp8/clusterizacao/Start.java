@@ -8,12 +8,10 @@ import java.util.List;
 
 import au.com.bytecode.opencsv.CSVReader;
 
-
 public class Start {
     public static void main(String[] args) throws IOException {
 	CSVReader reader = new CSVReader(new FileReader("data.csv"));
 	FileWriter writer = new FileWriter("out.csv");
-
 	List<String[]> myEntries = reader.readAll();
 	List<Punto> puntos = new ArrayList<Punto>();
 
