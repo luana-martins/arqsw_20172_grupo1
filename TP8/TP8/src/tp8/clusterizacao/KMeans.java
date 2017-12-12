@@ -1,129 +1,95 @@
 package tp8.clusterizacao;
 
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
+import tp8.persistences.Grafo;
+
 public class KMeans {
-    public KMeansResultado calcular(List<Punto> puntos, Integer k) {
-	List<Cluster> clusters = elegirCentroides(puntos, k);
+	private boolean termina = false;
+	private ArrayList<Grafo> distancias;
+	private int k;
+	private ArrayList<Grafo> cluster1 = new ArrayList<Grafo>();
+	private ArrayList<Grafo> cluster2 = new ArrayList<Grafo>();
+	private ArrayList<Grafo> cluster3 = new ArrayList<Grafo>();
 
-	while (!finalizo(clusters)) {
-	    prepararClusters(clusters);
-	    asignarPuntos(puntos, clusters);
-	    recalcularCentroides(clusters);
-	}
+	public void calcular(ArrayList<Grafo> distancias, int k) {
+		this.distancias = distancias;
+		this.k = k;
 
-	Double ofv = calcularFuncionObjetivo(clusters);
-
-	return new KMeansResultado(clusters, ofv);
-    }
-
-    private void recalcularCentroides(List<Cluster> clusters) {
-	for (Cluster c : clusters) {
-	    if (c.getPuntos().isEmpty()) {
-		c.setTermino(true);
-		continue;
-	    }
-
-	    Float[] d = new Float[c.getPuntos().get(0).getGrado()];
-	    Arrays.fill(d, 0f);
-	    for (Punto p : c.getPuntos()) {
-		for (int i = 0; i < p.getGrado(); i++) {
-		    d[i] += (p.get(i) / c.getPuntos().size());
+		ArrayList<String> centroides = elegerCentroides();
+		System.out.println("Centroides");
+		for(int i = 0; i < centroides.size();i++) {
+			System.out.print(" "+centroides.get(i));
 		}
-	    }
+		System.out.println();
+		
+		distribuirClasses(centroides);
 
-	    Punto nuevoCentroide = new Punto(d);
-
-	    if (nuevoCentroide.equals(c.getCentroide())) {
-		c.setTermino(true);
-	    } else {
-		c.setCentroide(nuevoCentroide);
-	    }
-	}
-    }
-
-    private void asignarPuntos(List<Punto> puntos, List<Cluster> clusters) {
-	for (Punto punto : puntos) {
-	    Cluster masCercano = clusters.get(0);
-	    Double distanciaMinima = Double.MAX_VALUE;
-	    for (Cluster cluster : clusters) {
-		Double distancia = punto.distanciaEuclideana(cluster
-			.getCentroide());
-		if (distanciaMinima > distancia) {
-		    distanciaMinima = distancia;
-		    masCercano = cluster;
+		System.out.println("--------CLUSTER1---------------");
+		for (int i = 0; i < cluster1.size(); i++) {
+			System.out.println(cluster1.get(i).getClasse1());
 		}
-	    }
-	    masCercano.getPuntos().add(punto);
-	}
-    }
 
-    private void prepararClusters(List<Cluster> clusters) {
-	for (Cluster c : clusters) {
-	    c.limpiarPuntos();
-	}
-    }
-
-    private Double calcularFuncionObjetivo(List<Cluster> clusters) {
-	Double ofv = 0d;
-
-	for (Cluster cluster : clusters) {
-	    for (Punto punto : cluster.getPuntos()) {
-		ofv += punto.distanciaEuclideana(cluster.getCentroide());
-	    }
+		System.out.println("--------CLUSTER2---------------");
+		for (int i = 0; i < cluster2.size(); i++) {
+			System.out.println(cluster2.get(i).getClasse1());
+		}
+		System.out.println("--------CLUSTER3---------------");
+		for (int i = 0; i < cluster3.size(); i++) {
+			System.out.println(cluster3.get(i).getClasse1());
+		}
+		recalcularCentroides();
+		
+		while (termina == true) {
+			distribuirClasses(centroides);
+			recalcularCentroides();
+		}
 	}
 
-	return ofv;
-    }
-
-    private boolean finalizo(List<Cluster> clusters) {
-	for (Cluster cluster : clusters) {
-	    if (!cluster.isTermino()) {
-		return false;
-	    }
+	private void recalcularCentroides() {
+		
 	}
-	return true;
-    }
+		
+	private void distribuirClasses(ArrayList<String> centroides) {
+		cluster1.add(0, new Grafo(centroides.get(0), centroides.get(0), 0.0));
+		cluster2.add(0, new Grafo(centroides.get(1), centroides.get(1), 0.0));
+		cluster3.add(0, new Grafo(centroides.get(2), centroides.get(2), 0.0));
 
-    private List<Cluster> elegirCentroides(List<Punto> puntos, Integer k) {
-	List<Cluster> centroides = new ArrayList<Cluster>();
-
-	List<Float> maximos = new ArrayList<Float>();
-	List<Float> minimos = new ArrayList<Float>();
-	// me fijo máximo y mínimo de cada dimensión
-
-	for (int i = 0; i < puntos.get(0).getGrado(); i++) {
-	    Float min = Float.POSITIVE_INFINITY, max = Float.NEGATIVE_INFINITY;
-
-	    for (Punto punto : puntos) {
-		min = min > punto.get(i) ? punto.get(0) : min;
-		max = max < punto.get(i) ? punto.get(i) : max;
-	    }
-
-	    maximos.add(max);
-	    minimos.add(min);
+		for (int i = 0; i < distancias.size(); i++) {
+			Double maiorSimilaridade = 0.0;
+			for (int j = 0; j < centroides.size(); j++) {
+				if (!centroides.contains(distancias.get(i).getClasse1())) {
+					if (centroides.get(j).equals(distancias.get(i).getClasse2())) {
+						if (maiorSimilaridade < distancias.get(i).getSimilaridade()) {
+							maiorSimilaridade = distancias.get(i).getSimilaridade();
+							if (j == 0) {
+								cluster1.add(distancias.get(i));
+							} else if (j == 1) {
+								cluster2.add(distancias.get(i));
+							} else if (j == 2) {
+								cluster3.add(distancias.get(i));
+							}
+						}
+					}
+				}
+			}
+		}
 	}
-
-	Random random = new Random();
-
-	for (int i = 0; i < k; i++) {
-	    Float[] data = new Float[puntos.get(0).getGrado()];
-	    Arrays.fill(data, 0f);
-	    for (int d = 0; d < puntos.get(0).getGrado(); d++) {
-		data[d] = random.nextFloat()
-			* (maximos.get(d) - minimos.get(d)) + minimos.get(d);
-	    }
-
-	    Cluster c = new Cluster();
-	    Punto centroide = new Punto(data);
-	    c.setCentroide(centroide);
-	    centroides.add(c);
+	
+	private ArrayList<String> elegerCentroides() {
+	
+		Random random = new Random();
+		 
+		int posicao;
+		ArrayList<String> centroides = new ArrayList<String>();
+		while (centroides.size() < 3) {
+			posicao = random.nextInt(distancias.size());
+			String novoCentro = distancias.get(posicao).getClasse1();
+			if (!centroides.contains(novoCentro)) {
+				centroides.add(novoCentro);
+			}
+		}	
+		return centroides;
 	}
-
-	return centroides;
-    }
 }

@@ -2,6 +2,7 @@ package tp8.handlers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -22,7 +23,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import tp8.ast.DependencyVisitor;
+import tp8.clusterizacao.KMeans;
 import tp8.persistences.Dependencias;
+import tp8.persistences.Grafo;
 import tp8.persistences.Recomendacao;
 import tp8.similaridade.Similaridade;
 
@@ -38,6 +41,7 @@ public class SampleHandler extends AbstractHandler {
 	private ArrayList<Dependencias> classesDependencias;
 	private Map<IPackageFragment,ArrayList<Dependencias>> classesPacotes;
 	public static ArrayList<Recomendacao> recomendacoes;
+	private ArrayList<Grafo> distancias;
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -45,6 +49,7 @@ public class SampleHandler extends AbstractHandler {
 		todosPacotes = new ArrayList<IPackageFragment>();
 		classesDependencias = new ArrayList<Dependencias>();
 		recomendacoes = new ArrayList<Recomendacao>();
+		distancias = new ArrayList<Grafo>();
 		
 		try {
 			SampleHandler.event = event;
@@ -72,35 +77,20 @@ public class SampleHandler extends AbstractHandler {
 			
 			//Calcula para cada classe a sua similaridade com o seu pacote e os outros pacotes
 			for(Dependencias classe : classesDependencias){
-				
-				double simMP=0;
-				IPackageFragment possivelDestino = null;
+//				IPackageFragment possivelDestino = null;
 				//Calcula a similaridade da classe com as classes do seu pacote
 				for (IPackageFragment pacote : classesPacotes.keySet()) {
 					if(pacote.getElementName().compareTo(classe.getPacote().getElementName())  == 0){
 						Similaridade si = new Similaridade();
-						simMP = si.similaridadeMesmoPacote(classe, classesPacotes.get(classe.getPacote()));
+						distancias = si.similaridadeMesmoPacote(classe, classesPacotes.get(classe.getPacote()));
 						break;
 					}
 				}
-				
-				double simPD=0;
-				//Calcula a similaridade da classe com as classes dos outros pacotes
-				for (IPackageFragment pacote : classesPacotes.keySet()) {
-					if(pacote.getElementName().compareTo(classe.getPacote().getElementName())  != 0){
-						Similaridade si = new Similaridade();
-						simPD = si.similaridadePacotesDiferentes(classe, classesPacotes.get(pacote));
-						if(simPD > simMP){
-							possivelDestino = pacote;
-						}
-					}
-				}
-				if(possivelDestino != null){
-					recomendacoes.add(new Recomendacao(classe.getClasse(),possivelDestino, simMP,simPD));
-				}
 			}
 			
-			
+			KMeans kmeans = new KMeans();
+			kmeans.calcular(distancias, 3);
+
 			
 			openView();
 
