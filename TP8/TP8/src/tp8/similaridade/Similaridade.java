@@ -2,36 +2,12 @@ package tp8.similaridade;
 
 import java.util.ArrayList;
 
-import tp8.persistences.Dependencias;
-import tp8.persistences.Grafo;
 
 public class Similaridade {
 
-	private static ArrayList<Grafo> distancias = new ArrayList<Grafo>();
+	
 
-	public ArrayList<Grafo> similaridadeMesmoPacote(Dependencias classe, ArrayList<Dependencias> classes) {
-		double similaridade = 0;
-		for (int i = 0; i < classes.size(); i++) {
-			if (classe.getClasse().getElementName().compareTo(classes.get(i).getClasse().getElementName()) == 0) {
-				continue;
-			}
-			similaridade = similaridadePSC(classe.getDependencias(), classes.get(i).getDependencias());
-			distancias.add(new Grafo(classe.getClasse().getElementName(), classes.get(i).getClasse().getElementName(),
-					similaridade));
-		}
-		return distancias;
-	}
-
-	public double similaridadePacotesDiferentes(Dependencias classe, ArrayList<Dependencias> classes) {
-		double similaridade = 0;
-		for (int i = 0; i < classes.size(); i++) {
-			similaridade = similaridadePSC(classe.getDependencias(), classes.get(i).getDependencias());
-		}
-		return similaridade / classes.size();
-
-	}
-
-	private double similaridadePSC(ArrayList<String> dependencias1, ArrayList<String> dependencias2) {
+	public double similaridadePSC(ArrayList<String> dependencias1, ArrayList<String> dependencias2) {
 		try {
 			int a, b, c;
 

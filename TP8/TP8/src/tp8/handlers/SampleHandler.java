@@ -1,9 +1,7 @@
 package tp8.handlers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -23,7 +21,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import tp8.ast.DependencyVisitor;
+
 import tp8.clusterizacao.KMeans;
+
 import tp8.persistences.Dependencias;
 import tp8.persistences.Grafo;
 import tp8.persistences.Recomendacao;
@@ -39,18 +39,16 @@ public class SampleHandler extends AbstractHandler {
 	public static IJavaProject javaProject;
 	private ArrayList<IPackageFragment> todosPacotes;
 	private ArrayList<Dependencias> classesDependencias;
-	private Map<IPackageFragment,ArrayList<Dependencias>> classesPacotes;
 	public static ArrayList<Recomendacao> recomendacoes;
 	private ArrayList<Grafo> distancias;
-	
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		classesPacotes = new HashMap<IPackageFragment,ArrayList<Dependencias>>();
 		todosPacotes = new ArrayList<IPackageFragment>();
 		classesDependencias = new ArrayList<Dependencias>();
 		recomendacoes = new ArrayList<Recomendacao>();
 		distancias = new ArrayList<Grafo>();
-		
+
 		try {
 			SampleHandler.event = event;
 
@@ -62,36 +60,24 @@ public class SampleHandler extends AbstractHandler {
 			}
 
 			getDependencies(iProject);
-			
-			//Separa em um map as classes por pacotes
-			for(int i=0; i<todosPacotes.size(); i++){
-				ArrayList<Dependencias> classesMesmoPacote = new ArrayList<Dependencias>();
-				for(Dependencias classe : classesDependencias){
-					if(classe.getPacote().getElementName().compareTo(todosPacotes.get(i).getElementName()) == 0){
-						classesMesmoPacote.add(classe);
+
+			Similaridade si = new Similaridade();
+
+			for (Dependencias d : classesDependencias) {
+				for (int i = 0; i < classesDependencias.size(); i++) {
+					if (d.getClasse().getFullyQualifiedName()
+							.compareTo(classesDependencias.get(i).getClasse().getFullyQualifiedName()) == 0) {
+						continue;
 					}
-				}
-				
-				classesPacotes.put(todosPacotes.get(i), classesMesmoPacote);
-			}
-			
-			//Calcula para cada classe a sua similaridade com o seu pacote e os outros pacotes
-			for(Dependencias classe : classesDependencias){
-//				IPackageFragment possivelDestino = null;
-				//Calcula a similaridade da classe com as classes do seu pacote
-				for (IPackageFragment pacote : classesPacotes.keySet()) {
-					if(pacote.getElementName().compareTo(classe.getPacote().getElementName())  == 0){
-						Similaridade si = new Similaridade();
-						distancias = si.similaridadeMesmoPacote(classe, classesPacotes.get(classe.getPacote()));
-						break;
-					}
+					distancias.add(new Grafo(d.getClasse().getFullyQualifiedName(),
+							classesDependencias.get(i).getClasse().getFullyQualifiedName(),
+							si.similaridadePSC(d.getDependencias(), classesDependencias.get(i).getDependencias())));
 				}
 			}
-			
+
 			KMeans kmeans = new KMeans();
 			kmeans.calcular(distancias, 3);
 
-			
 			openView();
 
 		} catch (JavaModelException e) {
@@ -101,7 +87,6 @@ public class SampleHandler extends AbstractHandler {
 		}
 		return null;
 	}
-
 
 	private void getDependencies(final IProject project) throws CoreException {
 		project.accept(new IResourceVisitor() {
@@ -115,7 +100,7 @@ public class SampleHandler extends AbstractHandler {
 					if (!todosPacotes.contains(dp.getPacote())) {
 						todosPacotes.add(dp.getPacote());
 					}
-					
+
 				}
 				return true;
 			}
@@ -156,6 +141,5 @@ public class SampleHandler extends AbstractHandler {
 			e.printStackTrace();
 		}
 	}
-	
 
 }
