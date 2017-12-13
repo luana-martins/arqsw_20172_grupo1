@@ -4,6 +4,7 @@ public class Grafo {
 	String classe1;
 	String classe2;
 	double similaridade;
+	
 	public String getClasse1() {
 		return classe1;
 	}

@@ -7,9 +7,9 @@ import tp8.persistences.Grafo;
 
 public class Punto {
     private Double[] data;
-
+    
     public Punto(Grafo grafo) {
-	List<Double> puntos = new ArrayList<Double>();
+    	List<Double> puntos = new ArrayList<Double>();
 	    puntos.add(grafo.getSimilaridade());
 	this.data = puntos.toArray(new Double[puntos.size()]);
     }

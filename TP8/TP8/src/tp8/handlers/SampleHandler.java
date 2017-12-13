@@ -42,6 +42,7 @@ public class SampleHandler extends AbstractHandler {
 	private ArrayList<Dependencias> classesDependencias;
 	public static ArrayList<Recomendacao> recomendacoes;
 	private ArrayList<Grafo> distancias;
+	private ArrayList<Grafo> aux;
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -49,7 +50,8 @@ public class SampleHandler extends AbstractHandler {
 		classesDependencias = new ArrayList<Dependencias>();
 		recomendacoes = new ArrayList<Recomendacao>();
 		distancias = new ArrayList<Grafo>();
-
+		aux = new ArrayList<Grafo>();
+		
 		try {
 			SampleHandler.event = event;
 
@@ -62,17 +64,22 @@ public class SampleHandler extends AbstractHandler {
 
 			getDependencies(iProject);
 
+			ArrayList<String> auxiliar = new ArrayList<String>();
+			
 			Similaridade si = new Similaridade();
 
 			for (Dependencias d : classesDependencias) {
 				for (int i = 0; i < classesDependencias.size(); i++) {
 					if (d.getClasse().getFullyQualifiedName()
 							.compareTo(classesDependencias.get(i).getClasse().getFullyQualifiedName()) == 0) {
+						auxiliar.add(d.getClasse().getFullyQualifiedName());
 						continue;
 					}
-					distancias.add(new Grafo(d.getClasse().getFullyQualifiedName(),
-							classesDependencias.get(i).getClasse().getFullyQualifiedName(),
-							si.similaridadePSC(d.getDependencias(), classesDependencias.get(i).getDependencias())));
+					if(!auxiliar.contains(d.getClasse().getFullyQualifiedName())) {
+						distancias.add(new Grafo(d.getClasse().getFullyQualifiedName(),
+								classesDependencias.get(i).getClasse().getFullyQualifiedName(),
+								si.similaridadePSC(d.getDependencias(), classesDependencias.get(i).getDependencias())));
+					}
 				}
 			}
 			
@@ -95,17 +102,31 @@ public class SampleHandler extends AbstractHandler {
 		    Punto p = new Punto(grafo);
 		    puntos.add(p);
 		}
-
+		
 		KMeans kmeans = new KMeans();
 		for (int k = 1; k <= 5; k++) {
 			KMeansResultado resultado = kmeans.calcular(puntos, k);
 			System.out.println("------- Con k=" + k + " ofv=" + resultado.getOfv() + "-------");
 			int i = 0;
+			ArrayList<String> a = null;
 			for (Cluster cluster : resultado.getClusters()) {
 				i++;
 				System.out.println("-- Cluster " + i + " --");
+				a = new ArrayList<String>();
 				for (Punto punto : cluster.getPuntos()) {
-					System.out.println(punto.toString() + "\n");
+					if(!a.contains(punto.toString())) {
+						a.add(punto.toString());
+					}
+					
+				//	System.out.println(punto.toString() + "\n");
+				}
+				
+				for(int l = 0; l < a.size();l++) {
+					for(int m = 0; m < distancias.size();m++) {
+					if(a.get(l).contains(distancias.get(m).getSimilaridade()+"")){
+						System.out.println(distancias.get(m).getClasse2());
+					}
+				}
 				}
 				System.out.println();
 				System.out.println(cluster.getCentroide().toString());
