@@ -1,7 +1,7 @@
 package tp8.handlers;
 
 import java.util.ArrayList;
-
+import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -21,9 +21,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import tp8.ast.DependencyVisitor;
-
-import tp8.clusterizacao.KMeans;
-
+import tp8.clusterings.Cluster;
+import tp8.clusterings.KMeans;
+import tp8.clusterings.KMeansResultado;
+import tp8.clusterings.Punto;
 import tp8.persistences.Dependencias;
 import tp8.persistences.Grafo;
 import tp8.persistences.Recomendacao;
@@ -74,9 +75,8 @@ public class SampleHandler extends AbstractHandler {
 							si.similaridadePSC(d.getDependencias(), classesDependencias.get(i).getDependencias())));
 				}
 			}
-
-			KMeans kmeans = new KMeans();
-			kmeans.calcular(distancias, 3);
+			
+			aplicaKMeans();
 
 			openView();
 
@@ -86,6 +86,32 @@ public class SampleHandler extends AbstractHandler {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	private void aplicaKMeans() {
+		List<Punto> puntos = new ArrayList<Punto>();
+
+		for (Grafo grafo : distancias) {
+		    Punto p = new Punto(grafo);
+		    puntos.add(p);
+		}
+
+		KMeans kmeans = new KMeans();
+		for (int k = 1; k <= 5; k++) {
+			KMeansResultado resultado = kmeans.calcular(puntos, k);
+			System.out.println("------- Con k=" + k + " ofv=" + resultado.getOfv() + "-------");
+			int i = 0;
+			for (Cluster cluster : resultado.getClusters()) {
+				i++;
+				System.out.println("-- Cluster " + i + " --");
+				for (Punto punto : cluster.getPuntos()) {
+					System.out.println(punto.toString() + "\n");
+				}
+				System.out.println();
+				System.out.println(cluster.getCentroide().toString());
+				System.out.println();
+			}
+		}
 	}
 
 	private void getDependencies(final IProject project) throws CoreException {

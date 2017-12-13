@@ -1,26 +1,24 @@
-package tp8.clusterizacao;
-
+package tp8.clusterings;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Punto {
-    private Float[] data;
+import tp8.persistences.Grafo;
 
-    public Punto(String[] strings) {
-	super();
-	List<Float> puntos = new ArrayList<Float>();
-	for (String string : strings) {
-	    puntos.add(Float.parseFloat(string));
-	}
-	this.data = puntos.toArray(new Float[strings.length]);
+public class Punto {
+    private Double[] data;
+
+    public Punto(Grafo grafo) {
+	List<Double> puntos = new ArrayList<Double>();
+	    puntos.add(grafo.getSimilaridade());
+	this.data = puntos.toArray(new Double[puntos.size()]);
     }
 
-    public Punto(Float[] data) {
+    public Punto(Double[] data) {
 	this.data = data;
     }
 
-    public float get(int dimension) {
+    public double get(int dimension) {
 	return data[dimension];
     }
 

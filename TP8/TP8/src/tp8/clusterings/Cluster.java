@@ -1,5 +1,4 @@
-package tp8.clusterizacao;
-
+package tp8.clusterings;
 
 import java.util.ArrayList;
 import java.util.List;
