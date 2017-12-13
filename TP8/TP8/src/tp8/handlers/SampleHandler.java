@@ -66,30 +66,20 @@ public class SampleHandler extends AbstractHandler {
 			}
 
 			getDependencies(iProject);
-
-			ArrayList<String> auxiliar = new ArrayList<String>();
-			
 			Similaridade si = new Similaridade();
 
 			for (Dependencias d : classesDependencias) {
 				for (int i = 0; i < classesDependencias.size(); i++) {
 					if (d.getClasse().getFullyQualifiedName()
 							.compareTo(classesDependencias.get(i).getClasse().getFullyQualifiedName()) == 0) {
-						auxiliar.add(d.getClasse().getFullyQualifiedName());
 						continue;
 					}
-					if(!auxiliar.contains(d.getClasse().getFullyQualifiedName())) {
-						distancias.add(new Grafo(d.getClasse().getFullyQualifiedName(),
-								classesDependencias.get(i).getClasse().getFullyQualifiedName(),
-								si.similaridadePSC(d.getDependencias(), classesDependencias.get(i).getDependencias())));
-					}
+					distancias.add(new Grafo(d.getClasse().getFullyQualifiedName(),
+							classesDependencias.get(i).getClasse().getFullyQualifiedName(),
+							si.similaridadePSC(d.getDependencias(), classesDependencias.get(i).getDependencias())));
 				}
 			}
-			
-//			for(int i = 0; i < distancias.size();i++) {
-//				System.out.println(distancias.get(i).getClasse1()+"  "+distancias.get(i).getClasse2()+"  "+distancias.get(i).getSimilaridade());
-//			}
-			
+
 			aplicaKMeans();
 
 			openView();
@@ -106,50 +96,47 @@ public class SampleHandler extends AbstractHandler {
 		List<Punto> puntos = new ArrayList<Punto>();
 
 		for (Grafo grafo : distancias) {
-		    Punto p = new Punto(grafo);
-		    puntos.add(p);
+			Punto p = new Punto(grafo);
+			puntos.add(p);
 		}
-		
-		KMeans kmeans = new KMeans();
-			KMeansResultado resultado = kmeans.calcular(puntos, 3);
-			System.out.println("Função Objetivo: "+ resultado.getOfv());
-			int i = 0;
-			ArrayList<String> a = null;
-			for (Cluster cluster : resultado.getClusters()) {
-				i++;	
-				for (Punto punto : cluster.getPuntos()) {
-						aux.put(punto.toString(), i);
-				//	System.out.println(punto.toString() + "\n");
-				}
-			}
-		
 
-		for(String value : aux.keySet()) {
-			for(int j = 0; j < distancias.size(); j++) {
-				if(value.equals(distancias.get(j).getSimilaridade()+"")) {
-					print.put(distancias.get(j).getClasse2(), aux.get(value)+"");	
+		KMeans kmeans = new KMeans();
+		KMeansResultado resultado = kmeans.calcular(puntos, 3);
+
+		int i = 0;
+		for (Cluster cluster : resultado.getClusters()) {
+			i++;
+			for (Punto punto : cluster.getPuntos()) {
+				aux.put(punto.toString(), i);
+			}
+		}
+
+		for (String value : aux.keySet()) {
+			for (int j = 0; j < distancias.size(); j++) {
+				if (value.equals(distancias.get(j).getSimilaridade() + "")) {
+					print.put(distancias.get(j).getClasse2(), aux.get(value) + "");
 				}
 			}
 		}
-		
+
 		System.out.println("------ Cluster 1 ------");
-		for(String value : print.keySet()) {
-			if(print.get(value).equals("1")) {
-				System.out.println("Classes: "+value);
+		for (String value : print.keySet()) {
+			if (print.get(value).equals("1")) {
+				System.out.println("Classes: " + value);
 			}
 		}
-		
+
 		System.out.println("------ Cluster 2 ------");
-		for(String value : print.keySet()) {
-			if(print.get(value).equals("2")) {
-				System.out.println("Classes: "+value);
+		for (String value : print.keySet()) {
+			if (print.get(value).equals("2")) {
+				System.out.println("Classes: " + value);
 			}
 		}
-		
+
 		System.out.println("------ Cluster 3 ------");
-		for(String value : print.keySet()) {
-			if(print.get(value).equals("3")) {
-				System.out.println("Classes: "+value);
+		for (String value : print.keySet()) {
+			if (print.get(value).equals("3")) {
+				System.out.println("Classes: " + value);
 			}
 		}
 	}
@@ -166,7 +153,6 @@ public class SampleHandler extends AbstractHandler {
 					if (!todosPacotes.contains(dp.getPacote())) {
 						todosPacotes.add(dp.getPacote());
 					}
-
 				}
 				return true;
 			}

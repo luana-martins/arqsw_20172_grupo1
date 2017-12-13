@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 public class KMeans {
-	
+
 	public KMeansResultado calcular(List<Punto> puntos, Integer k) {
 		List<Cluster> clusters = elegirCentroides(puntos, k);
 
@@ -75,7 +75,6 @@ public class KMeans {
 				ofv += punto.distanciaEuclideana(cluster.getCentroide());
 			}
 		}
-
 		return ofv;
 	}
 
@@ -93,7 +92,6 @@ public class KMeans {
 
 		List<Double> maximos = new ArrayList<Double>();
 		List<Double> minimos = new ArrayList<Double>();
-		// me fijo máximo y mínimo de cada dimensión
 
 		for (int i = 0; i < puntos.get(0).getGrado(); i++) {
 			Double min = Double.POSITIVE_INFINITY, max = Double.NEGATIVE_INFINITY;
@@ -121,7 +119,6 @@ public class KMeans {
 			c.setCentroide(centroide);
 			centroides.add(c);
 		}
-
 		return centroides;
 	}
 }
