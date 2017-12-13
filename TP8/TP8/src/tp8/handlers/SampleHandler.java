@@ -1,6 +1,7 @@
 package tp8.handlers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -42,7 +43,8 @@ public class SampleHandler extends AbstractHandler {
 	private ArrayList<Dependencias> classesDependencias;
 	public static ArrayList<Recomendacao> recomendacoes;
 	private ArrayList<Grafo> distancias;
-	private ArrayList<Grafo> aux;
+	private HashMap<String, Integer> aux;
+	private HashMap<String, String> print;
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -50,8 +52,9 @@ public class SampleHandler extends AbstractHandler {
 		classesDependencias = new ArrayList<Dependencias>();
 		recomendacoes = new ArrayList<Recomendacao>();
 		distancias = new ArrayList<Grafo>();
-		aux = new ArrayList<Grafo>();
-		
+		print = new HashMap<String, String>();
+		aux = new HashMap<String, Integer>();
+
 		try {
 			SampleHandler.event = event;
 
@@ -83,6 +86,10 @@ public class SampleHandler extends AbstractHandler {
 				}
 			}
 			
+//			for(int i = 0; i < distancias.size();i++) {
+//				System.out.println(distancias.get(i).getClasse1()+"  "+distancias.get(i).getClasse2()+"  "+distancias.get(i).getSimilaridade());
+//			}
+			
 			aplicaKMeans();
 
 			openView();
@@ -104,33 +111,45 @@ public class SampleHandler extends AbstractHandler {
 		}
 		
 		KMeans kmeans = new KMeans();
-		for (int k = 1; k <= 5; k++) {
-			KMeansResultado resultado = kmeans.calcular(puntos, k);
-			System.out.println("------- Con k=" + k + " ofv=" + resultado.getOfv() + "-------");
+			KMeansResultado resultado = kmeans.calcular(puntos, 3);
+			System.out.println("Função Objetivo: "+ resultado.getOfv());
 			int i = 0;
 			ArrayList<String> a = null;
 			for (Cluster cluster : resultado.getClusters()) {
-				i++;
-				System.out.println("-- Cluster " + i + " --");
-				a = new ArrayList<String>();
+				i++;	
 				for (Punto punto : cluster.getPuntos()) {
-					if(!a.contains(punto.toString())) {
-						a.add(punto.toString());
-					}
-					
+						aux.put(punto.toString(), i);
 				//	System.out.println(punto.toString() + "\n");
 				}
-				
-				for(int l = 0; l < a.size();l++) {
-					for(int m = 0; m < distancias.size();m++) {
-					if(a.get(l).contains(distancias.get(m).getSimilaridade()+"")){
-						System.out.println(distancias.get(m).getClasse2());
-					}
+			}
+		
+
+		for(String value : aux.keySet()) {
+			for(int j = 0; j < distancias.size(); j++) {
+				if(value.equals(distancias.get(j).getSimilaridade()+"")) {
+					print.put(distancias.get(j).getClasse2(), aux.get(value)+"");	
 				}
-				}
-				System.out.println();
-				System.out.println(cluster.getCentroide().toString());
-				System.out.println();
+			}
+		}
+		
+		System.out.println("------ Cluster 1 ------");
+		for(String value : print.keySet()) {
+			if(print.get(value).equals("1")) {
+				System.out.println("Classes: "+value);
+			}
+		}
+		
+		System.out.println("------ Cluster 2 ------");
+		for(String value : print.keySet()) {
+			if(print.get(value).equals("2")) {
+				System.out.println("Classes: "+value);
+			}
+		}
+		
+		System.out.println("------ Cluster 3 ------");
+		for(String value : print.keySet()) {
+			if(print.get(value).equals("3")) {
+				System.out.println("Classes: "+value);
 			}
 		}
 	}
