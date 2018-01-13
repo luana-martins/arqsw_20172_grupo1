@@ -1,8 +1,12 @@
 package tp7.handlers;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -23,8 +27,8 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import tp7.ast.DependencyVisitor;
 import tp7.persistences.Dependencias;
-import tp7.persistences.Recomendacao;
-import tp7.similaridade.Similaridade;
+import tp7.persistences.StatusConversa;
+import tp7.regras.Regras;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -37,14 +41,14 @@ public class SampleHandler extends AbstractHandler {
 	private ArrayList<IPackageFragment> todosPacotes;
 	private ArrayList<Dependencias> classesDependencias;
 	private Map<IPackageFragment,ArrayList<Dependencias>> classesPacotes;
-	public static ArrayList<Recomendacao> recomendacoes;
+	public static ArrayList<StatusConversa> recomendacoes;
 	
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	public Object execute(ExecutionEvent event) throws ExecutionException   {
 		classesPacotes = new HashMap<IPackageFragment,ArrayList<Dependencias>>();
 		todosPacotes = new ArrayList<IPackageFragment>();
 		classesDependencias = new ArrayList<Dependencias>();
-		recomendacoes = new ArrayList<Recomendacao>();
+		recomendacoes = new ArrayList<StatusConversa>();
 		
 		try {
 			SampleHandler.event = event;
@@ -64,43 +68,27 @@ public class SampleHandler extends AbstractHandler {
 				for(Dependencias classe : classesDependencias){
 					if(classe.getPacote().getElementName().compareTo(todosPacotes.get(i).getElementName()) == 0){
 						classesMesmoPacote.add(classe);
+					//	System.out.println(" pacote "+classe.getPacote().getElementName());
+					
 					}
 				}
 				
 				classesPacotes.put(todosPacotes.get(i), classesMesmoPacote);
 			}
+
 			
-			//Calcula para cada classe a sua similaridade com o seu pacote e os outros pacotes
-			for(Dependencias classe : classesDependencias){
+			
+			
 				
-				double simMP=0;
-				IPackageFragment possivelDestino = null;
-				//Calcula a similaridade da classe com as classes do seu pacote
-				for (IPackageFragment pacote : classesPacotes.keySet()) {
-					if(pacote.getElementName().compareTo(classe.getPacote().getElementName())  == 0){
-						Similaridade si = new Similaridade();
-						simMP = si.similaridadeMesmoPacote(classe, classesPacotes.get(classe.getPacote()));
-						break;
-					}
-				}
-				
-				double simPD=0;
-				//Calcula a similaridade da classe com as classes dos outros pacotes
-				for (IPackageFragment pacote : classesPacotes.keySet()) {
-					if(pacote.getElementName().compareTo(classe.getPacote().getElementName())  != 0){
-						Similaridade si = new Similaridade();
-						simPD = si.similaridadePacotesDiferentes(classe, classesPacotes.get(pacote));
-						if(simPD > simMP){
-							possivelDestino = pacote;
-						}
-					}
-				}
-				if(possivelDestino != null){
-					recomendacoes.add(new Recomendacao(classe.getClasse(),possivelDestino, simMP,simPD));
-				}
+			
+			ArrayList<StatusConversa> statusConversas = new ArrayList<StatusConversa>();
+			Regras regras = new Regras( classesDependencias);
+			statusConversas = regras.especificacaoDasDependencias();
+			
+			for(int i = 0; i < statusConversas.size();i++) {
+				System.out.println("tipo dep "+ statusConversas.get(i).getTipoDependencia()+" "
+						+ statusConversas.get(i).getClasseA()+" depende de "+statusConversas.get(i).getClasseB());
 			}
-			
-			
 			
 			openView();
 

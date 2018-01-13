@@ -63,6 +63,7 @@ public class DependencyVisitor extends ASTVisitor {
 				if (node.getSuperclassType() != null && t.getFullyQualifiedName()
 						.equals(node.getSuperclassType().resolveBinding().getQualifiedName()) && !node.resolveBinding().isPrimitive()) {
 					if (!dependencias.contains(t.getElementName())) {
+						//System.out.println("A "+t.getElementName());
 						dependencias.add(t.getElementName());
 					}
 				}
@@ -76,6 +77,7 @@ public class DependencyVisitor extends ASTVisitor {
 					SimpleType st = (SimpleType) it;
 					if (t.getFullyQualifiedName().equals(st.getName().resolveTypeBinding().getQualifiedName()) && !node.resolveBinding().isPrimitive()) {
 						if (!dependencias.contains(t.getElementName())) {
+					//		System.out.println("B "+t.getElementName());
 							dependencias.add(t.getElementName());
 						}
 					}
@@ -89,9 +91,9 @@ public class DependencyVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(FieldDeclaration node) {
-
 		if (!dependencias.contains(node.getType().resolveBinding().getName()) && !node.getType().isPrimitiveType()) {
-			dependencias.add(node.getType().resolveBinding().getName());
+				dependencias.add(node.getType().resolveBinding().getName());
+				//System.out.println("C2 "+node.getType().resolveBinding().getName());
 		}
 
 		return true;
@@ -104,6 +106,7 @@ public class DependencyVisitor extends ASTVisitor {
 			if (o instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration svd = (SingleVariableDeclaration) o;
 				if (!dependencias.contains(svd.getType().resolveBinding().getName()) && !svd.getType().isPrimitiveType()) {
+				//	System.out.println("D "+svd.getType().resolveBinding().getName());
 					dependencias.add(svd.getType().resolveBinding().getName());
 				}
 			}
@@ -114,6 +117,7 @@ public class DependencyVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		if (!dependencias.contains(node.getType().resolveBinding().getName()) && !node.getType().isPrimitiveType()) {
+			//System.out.println("E "+node.getType().resolveBinding().getName());
 			dependencias.add(node.getType().resolveBinding().getName());
 		}
 		return true;
