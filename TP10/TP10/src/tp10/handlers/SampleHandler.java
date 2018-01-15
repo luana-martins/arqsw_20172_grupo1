@@ -1,7 +1,9 @@
 package tp10.handlers;
 
-import java.util.ArrayList;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -12,7 +14,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.ui.IViewPart;
@@ -22,6 +23,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import tp10.ast.DependencyVisitor;
+import tp10.persistences.Dependencias;
+import tp10.persistences.StatusConversa;
+import tp10.regras.Regras;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -29,33 +33,72 @@ import org.eclipse.jface.viewers.TreeSelection;
 @SuppressWarnings("restriction")
 public class SampleHandler extends AbstractHandler {
 
-	public static ArrayList<Violacao> arrayDados;
 	public static ExecutionEvent event;
-	public static ArrayList<DadosMetodo> dadosProjeto;
+	public static IJavaProject javaProject;
+	private ArrayList<IPackageFragment> todosPacotes;
+	private ArrayList<Dependencias> classesDependencias;
+	private Map<IPackageFragment,ArrayList<Dependencias>> classesPacotes;
+	public static ArrayList<StatusConversa> recomendacoes;
 	
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		dadosProjeto = new ArrayList<DadosMetodo>();
-		SampleHandler.event = event;
-		arrayDados= new ArrayList<Violacao>();
+	public Object execute(ExecutionEvent event) throws ExecutionException   {
+		classesPacotes = new HashMap<IPackageFragment,ArrayList<Dependencias>>();
+		todosPacotes = new ArrayList<IPackageFragment>();
+		classesDependencias = new ArrayList<Dependencias>();
+		recomendacoes = new ArrayList<StatusConversa>();
 		
-		hideView();
-		
-		IProject iProject = getProjectFromWorkspace(event);
-
 		try {
-			getMethods(iProject);
+			SampleHandler.event = event;
+
+			hideView();
+
+			IProject iProject = getProjectFromWorkspace(event);
+			if (iProject == null) {
+				return null;
+			}
+
+			getDependencies(iProject);
+			
+			//Separa em um map as classes por pacotes
+			for(int i=0; i<todosPacotes.size(); i++){
+				ArrayList<Dependencias> classesMesmoPacote = new ArrayList<Dependencias>();
+				for(Dependencias classe : classesDependencias){
+					if(classe.getPacote().getElementName().compareTo(todosPacotes.get(i).getElementName()) == 0){
+						classesMesmoPacote.add(classe);
+					//	System.out.println(" pacote "+classe.getPacote().getElementName());
+					
+					}
+				}
+				
+				classesPacotes.put(todosPacotes.get(i), classesMesmoPacote);
+			}
+
+			
+			
+			
+				
+			
+			ArrayList<StatusConversa> statusConversas = new ArrayList<StatusConversa>();
+			Regras regras = new Regras( classesDependencias);
+			statusConversas = regras.especificacaoDasDependencias();
+			
+			for(int i = 0; i < statusConversas.size();i++) {
+				System.out.println("tipo dep "+ statusConversas.get(i).getTipoDependencia()+" "
+						+ statusConversas.get(i).getClasseA()+" depende de "+statusConversas.get(i).getClasseB());
+			}
+			
+			openView();
+
+		} catch (JavaModelException e) {
+			e.printStackTrace();
 		} catch (CoreException e) {
 			e.printStackTrace();
-		}	
-		PadraoArquitetural pa = new PadraoArquitetural();
-		pa.popular();
-		arrayDados = pa.conferirConversa();
-		openView();
+		}
 		return null;
 	}
 
-	private void getMethods(final IProject project) throws CoreException {
+
+	private void getDependencies(final IProject project) throws CoreException {
 		project.accept(new IResourceVisitor() {
 
 			@Override
@@ -63,6 +106,11 @@ public class SampleHandler extends AbstractHandler {
 				if (resource instanceof IFile && resource.getName().endsWith(".java")) {
 					ICompilationUnit unit = ((ICompilationUnit) JavaCore.create((IFile) resource));
 					DependencyVisitor dp = new DependencyVisitor(unit);
+					classesDependencias.add(new Dependencias(dp.getClazz(), dp.getDependenciasClasse()));
+					if (!todosPacotes.contains(dp.getPacote())) {
+						todosPacotes.add(dp.getPacote());
+					}
+					
 				}
 				return true;
 			}
@@ -103,5 +151,6 @@ public class SampleHandler extends AbstractHandler {
 			e.printStackTrace();
 		}
 	}
+	
 
 }

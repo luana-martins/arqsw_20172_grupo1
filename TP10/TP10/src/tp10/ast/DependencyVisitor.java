@@ -1,38 +1,37 @@
 package tp10.ast;
 
 import java.util.ArrayList;
+
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-
-import tp10.handlers.DadosDeclaracao;
-import tp10.handlers.DadosMetodo;
-import tp10.handlers.SampleHandler;
 
 public class DependencyVisitor extends ASTVisitor {
 
 	private CompilationUnit fullClass;
-	private ArrayList<MethodDeclaration> arrayMethod;
-	private String pacote ="";
-	DadosMetodo dados = null;
-	String  nome = "";
-	private ArrayList<DadosDeclaracao> arrayClasse;
-	DadosDeclaracao decl;
-	private ArrayList<String> parametros = null;
-	ArrayList<String> estatico;
+	private IPackageFragment pacote;
+	private IType clazz;
+	private ICompilationUnit unit;
+	private ArrayList<String> dependencias;
 
-	@SuppressWarnings("deprecation")
 	public DependencyVisitor(ICompilationUnit unit) throws JavaModelException {
-
-		ASTParser parser = ASTParser.newParser(AST.JLS4); 
+		dependencias = new ArrayList<String>();
+		this.unit = unit;
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setSource(unit);
 		parser.setCompilerOptions(JavaCore.getOptions());
@@ -40,46 +39,100 @@ public class DependencyVisitor extends ASTVisitor {
 		parser.setResolveBindings(true);
 		parser.setBindingsRecovery(true);
 
-		this.fullClass = (CompilationUnit) parser.createAST(null);// parse
+		this.fullClass = (CompilationUnit) parser.createAST(null);
 		this.fullClass.accept(this);
 	}
-
-	public ArrayList<MethodDeclaration> getArrayMethod() {
-		return arrayMethod;
+	
+	@Override
+	public boolean visit(PackageDeclaration pack) {
+		pacote = (IPackageFragment) pack.resolveBinding().getJavaElement();
+		return true;
 	}
 
+
 	@Override
-	public boolean visit(TypeDeclaration anota){
-		nome = anota.getName().toString();
-		arrayClasse = new ArrayList<DadosDeclaracao>();
-		for(FieldDeclaration model : anota.getFields()) {
-			decl = new DadosDeclaracao(model.getType()+ " " , model.fragments().get(0).toString());
-			arrayClasse.add(decl);
+	public boolean visit(TypeDeclaration node) {
+
+		clazz = (IType) node.resolveBinding().getJavaElement();
+		try {
+
+			IType type = (IType) unit.getTypes()[0];
+			ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(null);
+			IType[] typeSuperclasses = typeHierarchy.getAllSuperclasses(type);
+			for (IType t : typeSuperclasses) {
+				if (node.getSuperclassType() != null && t.getFullyQualifiedName()
+						.equals(node.getSuperclassType().resolveBinding().getQualifiedName()) && !node.resolveBinding().isPrimitive()) {
+					if (!dependencias.contains(t.getElementName())) {
+						//System.out.println("A "+t.getElementName());
+						dependencias.add(t.getElementName());
+					}
+				}
+			}
+
+			IType[] typeSuperinter = typeHierarchy.getAllInterfaces();
+
+			for (IType t : typeSuperinter) {
+				for (Object it : node.superInterfaceTypes()) {
+
+					SimpleType st = (SimpleType) it;
+					if (t.getFullyQualifiedName().equals(st.getName().resolveTypeBinding().getQualifiedName()) && !node.resolveBinding().isPrimitive()) {
+						if (!dependencias.contains(t.getElementName())) {
+					//		System.out.println("B "+t.getElementName());
+							dependencias.add(t.getElementName());
+						}
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			e.printStackTrace();
 		}
 		return true;
 	}
 
 	@Override
-	public boolean visit(PackageDeclaration pack) {
-		pacote = pack.getName().toString();
+	public boolean visit(FieldDeclaration node) {
+		if (!dependencias.contains(node.getType().resolveBinding().getName()) && !node.getType().isPrimitiveType()) {
+				dependencias.add(node.getType().resolveBinding().getName());
+				//System.out.println("C2 "+node.getType().resolveBinding().getName());
+		}
+
 		return true;
 	}
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
 
-		arrayMethod = new ArrayList<MethodDeclaration>();
-		parametros = new ArrayList<String>();
-		arrayMethod.add(node);
-
-		System.out.println("metodo name "+node.getName().toString());
-		for(int i =0; i < node.parameters().size();i++) {
-			parametros.add(node.parameters().get(i).toString());
-			System.out.println(node.parameters().get(i).toString());
+		for (Object o : node.parameters()) {
+			if (o instanceof SingleVariableDeclaration) {
+				SingleVariableDeclaration svd = (SingleVariableDeclaration) o;
+				if (!dependencias.contains(svd.getType().resolveBinding().getName()) && !svd.getType().isPrimitiveType()) {
+				//	System.out.println("D "+svd.getType().resolveBinding().getName());
+					dependencias.add(svd.getType().resolveBinding().getName());
+				}
+			}
 		}
-		
-		dados = new DadosMetodo(arrayMethod, pacote, nome, node.getName().toString(), arrayClasse, parametros);
-		SampleHandler.dadosProjeto.add(dados);
 		return true;
 	}
+
+	@Override
+	public boolean visit(ClassInstanceCreation node) {
+		if (!dependencias.contains(node.getType().resolveBinding().getName()) && !node.getType().isPrimitiveType()) {
+			//System.out.println("E "+node.getType().resolveBinding().getName());
+			dependencias.add(node.getType().resolveBinding().getName());
+		}
+		return true;
+	}
+
+	public ArrayList<String> getDependenciasClasse() {
+		return dependencias;
+	}
+
+	public IType getClazz() {
+		return clazz;
+	}
+	
+	public IPackageFragment getPacote(){
+		return pacote;
+	}
+
 }

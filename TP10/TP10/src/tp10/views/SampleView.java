@@ -1,20 +1,37 @@
 package tp10.views;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.eclipse.ui.part.*;
-
-import tp10.handlers.SampleHandler;
-import tp10.handlers.Violacao;
-
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.SWT;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.part.ViewPart;
+
+import tp10.handlers.SampleHandler;
+import tp10.persistences.StatusConversa;
 
 public class SampleView extends ViewPart {
 
@@ -22,21 +39,22 @@ public class SampleView extends ViewPart {
 
 	private TableViewer viewer;
 	private Action doubleClickAction;
+	private Action applyRemodularizationAction;
 
 	public void createPartControl(Composite parent) {
-		GridLayout layout = new GridLayout(2, false);
+		GridLayout layout = new GridLayout(4, false);
 		parent.setLayout(layout);
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
-		String[] titles = { "Classe Violada", "Classe Violadora", "Método Violador"};
-		int[] bounds = { 150, 200, 200};
+		String[] titles = { "Classe", "Pacote Destino", "Sim. Pacote Atual", "Sim. Pacote Destino" };
+		int[] bounds = { 150, 150, 150, 150 };
 
 		TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0);
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				Violacao v = (Violacao) element;
-				return v.getClasseViolada();
+				StatusConversa r = (StatusConversa) element;
+				return r.getClasseA();
 			}
 		});
 
@@ -44,8 +62,8 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				Violacao v = (Violacao) element;
-				return v.getClasseVioladora();
+				StatusConversa r = (StatusConversa) element;
+				return r.getClasseB();
 			}
 		});
 		
@@ -53,11 +71,11 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				Violacao v = (Violacao) element;
-				return v.getMetodoViolador();
+				StatusConversa r = (StatusConversa) element;
+				return String.valueOf(r.getTipoDependencia());
 			}
 		});
-
+		
 		viewer.refresh();
 
 		final Table table = viewer.getTable();
@@ -66,7 +84,7 @@ public class SampleView extends ViewPart {
 
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
 
-		viewer.setInput(SampleHandler.arrayDados);
+		viewer.setInput(SampleHandler.recomendacoes);
 		getSite().setSelectionProvider(viewer);
 
 		GridData gridData = new GridData();
@@ -76,7 +94,10 @@ public class SampleView extends ViewPart {
 		gridData.grabExcessVerticalSpace = true;
 		gridData.horizontalAlignment = GridData.FILL;
 		viewer.getControl().setLayoutData(gridData);
-		
+
+		makeActions();
+		hookContextMenu();
+		contributeToActionBars();
 		hookDoubleClickAction();
 
 	}
@@ -94,24 +115,89 @@ public class SampleView extends ViewPart {
 		column.setMoveable(true);
 		return viewerColumn;
 	}
-	
+
 	private void hookDoubleClickAction() {
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				doubleClickAction.run();
 			}
 		});
-	
+
 		doubleClickAction = new Action() {
 			public void run() {
 				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-				Violacao v = (Violacao) selection.getFirstElement();
+				StatusConversa r = (StatusConversa) selection.getFirstElement();
+				MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação",
+						"Refatoração realizada com sucesso!");
 				
-				MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação", v.getMessage());
+				SampleHandler.recomendacoes.clear();
+				
+				IWorkbenchPage wp = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 
-				
+				// Find desired view :
+				IViewPart myView = wp.findView("tp1.views.SampleView");
+
+				// Hide the view :
+				wp.hideView(myView);
+
+				try {
+					wp.showView("tp1.views.SampleView");
+				} catch (PartInitException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 			}
 		};
 	}
+
+	private void hookContextMenu() {
+		MenuManager menuMgr = new MenuManager("#PopupMenu");
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				SampleView.this.fillContextMenu(manager);
+			}
+		});
+		Menu menu = menuMgr.createContextMenu(viewer.getControl());
+		viewer.getControl().setMenu(menu);
+		getSite().registerContextMenu(menuMgr, viewer);
+	}
+
+	private void contributeToActionBars() {
+		IActionBars bars = getViewSite().getActionBars();
+		fillLocalPullDown(bars.getMenuManager());
+		fillLocalToolBar(bars.getToolBarManager());
+	}
+
+	private void fillLocalPullDown(IMenuManager manager) {
+		manager.add(applyRemodularizationAction);
+		manager.add(new Separator());
+	}
+
+	private void fillContextMenu(IMenuManager manager) {
+		manager.add(applyRemodularizationAction);
+		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+	}
+
+	private void fillLocalToolBar(IToolBarManager manager) {
+		manager.add(applyRemodularizationAction);
+
+	}
+
+	private void makeActions() {
+		applyRemodularizationAction = new Action() {
+			public void run() {
+
+			}
+
+		};
+
+		applyRemodularizationAction.setToolTipText("Apply Remodularization");
+		applyRemodularizationAction.setImageDescriptor(
+				PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD));
+		applyRemodularizationAction.setEnabled(true);
+	}
+
+
 }
