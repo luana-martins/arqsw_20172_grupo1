@@ -23,12 +23,10 @@ import tp10.persistences.StatusConversa;
 public class Regras {
 
 	private ArrayList<Dependencias> classesDependencias;
-	private ArrayList<StatusConversa> status;
 	Properties p = new Properties();
 
 	public Regras(ArrayList<Dependencias> classesDependencias) {
 		this.classesDependencias = classesDependencias;
-		status = new ArrayList<StatusConversa>();
 		try {
 			p.load(new FileInputStream("C:\\Users\\Luana\\Downloads\\arqsw_20172_grupo1\\TP10\\TP10\\prop.txt"));
 			
@@ -39,7 +37,7 @@ public class Regras {
 		}
 	}
 	
-	public ArrayList<StatusConversa> especificacaoDasDependencias() { 
+	public void especificacaoDasDependencias() { 
 		String array[] = new String[3];
 		 try {
 	            File f = new File("C:\\Users\\Luana\\Downloads\\arqsw_20172_grupo1\\TP10\\TP10\\regras.txt");
@@ -59,11 +57,12 @@ public class Regras {
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	        }
-		return status;
+		return;
 	}
 
 	public void conversa(String a, String b, int tipoDependencia) {
 		int cont = 0;
+		StatusConversa aux = null;
 		if(b.equals("util") || b.equals("model") || b.equals("controller") || b.equals("view")){
 			for (int i = 0; i < classesDependencias.size(); i++) {
 				if (classesDependencias.get(i).getPacote().getElementName().equals(a)) {
@@ -72,7 +71,20 @@ public class Regras {
 							if (classesDependencias.get(i).getDependencias()
 									.contains(classesDependencias.get(j).getClasse().getElementName())) {
 								cont++;
+								aux = new StatusConversa(a,b,classesDependencias.get(i).getClasse().getElementName(),
+										classesDependencias.get(j).getClasse().getElementName(), tipoDependencia); 
+								if(!SampleHandler.status.contains(aux)) {
+									SampleHandler.status.add(aux);
+								}
 							}
+							else {
+								aux = new StatusConversa(a,b,classesDependencias.get(i).getClasse().getElementName(),
+										classesDependencias.get(j).getClasse().getElementName(), tipoDependencia+3);
+								if(!SampleHandler.status.contains(aux)) {
+									SampleHandler.status.add(aux);
+								}
+							}
+							
 						}
 					}
 				}
@@ -81,13 +93,9 @@ public class Regras {
 			if(cont==0) {
 				SampleHandler.recomendacoes.add(new StatusConversa(a,
 							b, tipoDependencia+3));
-				status.add(new StatusConversa(a,
-							b, tipoDependencia+3)); 
 			} 
 			else {
 				SampleHandler.recomendacoes.add(new StatusConversa(a,
-						b, tipoDependencia));
-				status.add(new StatusConversa(a,
 						b, tipoDependencia));
 			}
 		}
@@ -104,6 +112,16 @@ public class Regras {
 							if (classesDependencias.get(i).getDependencias().toString()
 									.contains(keywordsList.get(j))) {
 								cont++;
+								aux = new StatusConversa(a,b, classesDependencias.get(i).getClasse().getElementName(), "", tipoDependencia);
+								if(!SampleHandler.status.contains(aux)) {
+									SampleHandler.status.add(aux);
+								}
+							}
+							else {
+								aux = new StatusConversa(a,b, classesDependencias.get(i).getClasse().getElementName(), "", tipoDependencia+3);
+								if(!SampleHandler.status.contains(aux)) {
+									SampleHandler.status.add(aux);
+								}
 							}
 					}
 				}
@@ -111,13 +129,9 @@ public class Regras {
 			if(cont==0) {
 				SampleHandler.recomendacoes.add(new StatusConversa(a,
 						b, tipoDependencia+3));
-				status.add(new StatusConversa(a,
-							b, tipoDependencia+3)); 
 			} 
 			else {
 				SampleHandler.recomendacoes.add(new StatusConversa(a,
-						b, tipoDependencia));
-				status.add(new StatusConversa(a,
 						b, tipoDependencia));
 			}
 		}

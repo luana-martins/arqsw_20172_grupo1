@@ -38,15 +38,15 @@ public class SampleHandler extends AbstractHandler {
 	public static IJavaProject javaProject;
 	private ArrayList<IPackageFragment> todosPacotes;
 	private ArrayList<Dependencias> classesDependencias;
-	private Map<IPackageFragment,ArrayList<Dependencias>> classesPacotes;
-	public static ArrayList<StatusConversa> recomendacoes;
 	
+	public static ArrayList<StatusConversa> status;
+	public static ArrayList<StatusConversa> recomendacoes;
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException   {
-		classesPacotes = new HashMap<IPackageFragment,ArrayList<Dependencias>>();
 		todosPacotes = new ArrayList<IPackageFragment>();
 		classesDependencias = new ArrayList<Dependencias>();
 		recomendacoes = new ArrayList<StatusConversa>();
+		status = new ArrayList<StatusConversa>();
 		
 		try {
 			SampleHandler.event = event;
@@ -60,17 +60,9 @@ public class SampleHandler extends AbstractHandler {
 
 			getDependencies(iProject);
 			
-				
-			
-			ArrayList<StatusConversa> statusConversas = new ArrayList<StatusConversa>();
 			Regras regras = new Regras( classesDependencias);
-			statusConversas = regras.especificacaoDasDependencias();
-			
-			for(int i = 0; i < recomendacoes.size();i++) {
-				System.out.println("tipo dep "+ recomendacoes.get(i).getTipoDependencia()+" "
-						+ recomendacoes.get(i).getClasseA()+" depende de "+recomendacoes.get(i).getClasseB());
-			}
-			
+			regras.especificacaoDasDependencias();
+	
 			openView();
 
 		} catch (JavaModelException e) {

@@ -57,7 +57,7 @@ public class SampleView extends ViewPart {
 		parent.setLayout(layout);
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
-		String[] titles = { "Pacote A", "Pacote B", "A->B", "Sim. Pacote Destino" };
+		String[] titles = { " Pacote ", " depende de "};
 		int[] bounds = { 150, 150, 150, 150 };
 
 		TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0);
@@ -65,7 +65,7 @@ public class SampleView extends ViewPart {
 			@Override
 			public String getText(Object element) {
 				StatusConversa r = (StatusConversa) element;
-				return r.getClasseA();
+				return r.getPacoteA();
 			}
 			
 			public Color getBackground(Object element) {
@@ -94,7 +94,7 @@ public class SampleView extends ViewPart {
 			@Override
 			public String getText(Object element) {
 				StatusConversa r = (StatusConversa) element;
-				return r.getClasseB();
+				return r.getPacoteB();
 			}
 			
 			public Color getBackground(Object element) {
@@ -116,34 +116,7 @@ public class SampleView extends ViewPart {
 				}
 			}
 		});
-		
-		col = createTableViewerColumn(titles[2], bounds[2], 2);
-		col.setLabelProvider(new ColumnLabelProvider() {
-			@Override
-			public String getText(Object element) {
-				StatusConversa r = (StatusConversa) element;
-				return String.valueOf(r.getTipoDependencia());
-			}
-			
-			public Color getBackground(Object element) {
-				StatusConversa r = (StatusConversa) element;
-				if(r.getTipoDependencia() == 4) {
-					return Display.getCurrent().getSystemColor(SWT.COLOR_RED);
-				}
-				else if(r.getTipoDependencia() == 2) {
-					return Display.getCurrent().getSystemColor(SWT.COLOR_YELLOW);
-				}
-				else if(r.getTipoDependencia() == 3) {
-					return Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
-				}
-				else if(r.getTipoDependencia() == 0) {
-					return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
-				}
-				else {
-				return Display.getCurrent().getSystemColor(SWT.COLOR_WHITE);
-				}
-			}
-		});
+
 		
 		viewer.refresh();
 
@@ -196,10 +169,44 @@ public class SampleView extends ViewPart {
 			public void run() {
 				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 				StatusConversa r = (StatusConversa) selection.getFirstElement();
-				MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação",
-						"Refatoração realizada com sucesso!");
-				
 				SampleHandler.recomendacoes.clear();
+				
+				StringBuilder sb =  new StringBuilder();
+				for(int i = 0; i < SampleHandler.status.size();i++) {
+					if(SampleHandler.status.get(i).getPacoteA().equals(r.getPacoteA()) &&
+							SampleHandler.status.get(i).getPacoteB().equals(r.getPacoteB())) {
+						
+						System.out.println("teste "+SampleHandler.status.get(i).getPacoteA()+" "+r.getPacoteA() +" "+
+							SampleHandler.status.get(i).getPacoteB()+" "+r.getPacoteB());
+						
+						 
+							
+						 if(SampleHandler.status.get(i).getTipoDependencia()==0) {
+							 System.out.println("entreou 0");
+							 sb.append("A classe "+SampleHandler.status.get(i).getClasseA()+"."+SampleHandler.status.get(i).getPacoteA());
+							 sb.append(" PODE depender de ");
+							 sb.append(r.getPacoteB()+"\n");
+						 }else if(SampleHandler.status.get(i).getTipoDependencia()==3) {
+							 System.out.println("entreou 3");
+							 sb.append("A classe "+SampleHandler.status.get(i).getClasseA()+"."+SampleHandler.status.get(i).getPacoteA());
+							 sb.append(" PODE MAS NAO depdende de ");
+							 sb.append(r.getPacoteB()+"\n");
+						 } else if(SampleHandler.status.get(i).getTipoDependencia()==4) {
+							 System.out.println("entreou 4");
+							 sb.append("A classe "+SampleHandler.status.get(i).getClasseA()+"."+SampleHandler.status.get(i).getPacoteA());
+							 sb.append(" DEVE MAS NAO depdende de ");
+							 sb.append(r.getPacoteB()+"\n");
+						 }else if(SampleHandler.status.get(i).getTipoDependencia()==2) {
+							 System.out.println("entreou 2");
+							 sb.append("A classe "+SampleHandler.status.get(i).getClasseA()+"."+SampleHandler.status.get(i).getPacoteA());
+							 sb.append(" NAO PODE MAS depdende de ");
+							 sb.append(r.getPacoteB()+"\n");
+						 }
+						
+						 }
+					}
+				MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação de conformidade",
+						sb.toString());
 				
 				IWorkbenchPage wp = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 
