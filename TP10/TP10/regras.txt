@@ -1,16 +1,3 @@
-model CANNOT view
-model CANNOT controller
-model CANNOT awt
-model CAN util
-view CAN awt
-view CANNOT model
-view MUST controller
-view CAN util
-controller MUST model
+view MUST model
 controller CANNOT awt
 controller CAN util
-controller MUST view
-util CANNOT view
-util CANNOT controller
-util CANNOT model
-util CANNOT awt

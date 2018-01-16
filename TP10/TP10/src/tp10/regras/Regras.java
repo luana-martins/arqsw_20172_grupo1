@@ -10,12 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
-
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.internal.codeassist.impl.Keywords;
-import org.eclipse.ui.internal.registry.KeywordRegistry;
-import org.omg.IOP.ENCODING_CDR_ENCAPS;
-
 import tp10.handlers.SampleHandler;
 import tp10.persistences.Dependencias;
 import tp10.persistences.StatusConversa;
@@ -43,7 +37,6 @@ public class Regras {
 	            File f = new File("C:\\Users\\Luana\\Downloads\\arqsw_20172_grupo1\\TP10\\TP10\\regras.txt");
 	            BufferedReader b = new BufferedReader(new FileReader(f));
 	            String readLine = "";
-	            System.out.println("Reading file using Buffered Reader");
 	            while ((readLine = b.readLine()) != null) {
 	            	array = readLine.split(" ");
 	            	if(array[1].equals("CAN"))
@@ -53,9 +46,8 @@ public class Regras {
 	            	else if(array[1].equals("CANNOT"))
 		            	conversa(array[0], array[2], 2);
 	            }
-
 	        } catch (IOException e) {
-	            e.printStackTrace();
+	        	System.err.println("notnotFound");
 	        }
 		return;
 	}
