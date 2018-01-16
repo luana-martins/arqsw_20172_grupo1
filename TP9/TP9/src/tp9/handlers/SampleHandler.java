@@ -19,7 +19,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import tp9.ast.DependencyVisitor;
-import tp9.enums.MVC;
+import tp9.enums.Archs;
 import tp9.persistences.Dependencias;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -30,11 +30,13 @@ public class SampleHandler extends AbstractHandler {
 	public static ExecutionEvent event;
 	public static IJavaProject javaProject;
 	public static ArrayList<Dependencias> classesDependencias;
-	
+	public static boolean temUmaViewMVC;
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		classesDependencias = new ArrayList<Dependencias>();
-		
+		temUmaViewMVC = false;
+
 		try {
 			SampleHandler.event = event;
 
@@ -46,44 +48,42 @@ public class SampleHandler extends AbstractHandler {
 			}
 
 			getDependencies(iProject);
-			
-			for(Dependencias classe : classesDependencias){
-				System.out.println("----------------------------------------------------------------------------------------");
-				System.out.println("Classe: "+classe.getClasse().getFullyQualifiedName());
-				System.out.println("Classes dependentes: "+classe.getTypes());
-				System.out.println("Imports: "+classe.getImports());
-				System.out.println("Correnpondencias em model: "+classe.getMVCCounts()[0]);
-				System.out.println("Correnpondencias em view: "+classe.getMVCCounts()[1]);
-				System.out.println("Correnpondencias em controller: "+classe.getMVCCounts()[2]);
-				
+
+			for (Dependencias classe : classesDependencias) {
+				System.out.println(
+						"----------------------------------------------------------------------------------------");
+				System.out.println("Classe: " + classe.getClasse().getFullyQualifiedName());
+				System.out.println("Dependencias: " + classe.getDependencias());
+				System.out.println("Correnpondencias em model: " + classe.getMVCCounts()[0]);
+				System.out.println("Correnpondencias em view: " + classe.getMVCCounts()[1]);
+				System.out.println("Correnpondencias em controller: " + classe.getMVCCounts()[2]);
+
 			}
-			
-			if(Dependencias.temUmaViewMVC()){
-				for(Dependencias classe : classesDependencias){
-					if(classe.getTipoClasse() == MVC.VIEW_MVP || classe.getTipoClasse() == MVC.VIEW_MVC){
-						classe.setTipoClasse(MVC.VIEW);
+
+			if (temUmaViewMVC) {
+				for (Dependencias classe : classesDependencias) {
+					if (classe.getTipoClasse() == Archs.VIEW_MVP || classe.getTipoClasse() == Archs.VIEW_MVC) {
+						classe.setTipoClasse(Archs.VIEW);
 					}
 				}
-				
+
 				MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Informação", "Arquiteura MVC");
 				openView();
-				
-			} else{
-				for(Dependencias classe : classesDependencias){
-					if(classe.getTipoClasse() == MVC.VIEW_MVP || classe.getTipoClasse() == MVC.VIEW_MVC){
-						classe.setTipoClasse(MVC.VIEW);
+
+			} else {
+				for (Dependencias classe : classesDependencias) {
+					if (classe.getTipoClasse() == Archs.VIEW_MVP || classe.getTipoClasse() == Archs.VIEW_MVC) {
+						classe.setTipoClasse(Archs.VIEW);
 					}
-					if(classe.getTipoClasse() == MVC.CONTROLLER){
-						classe.setTipoClasse(MVC.PRESENTER);
+					if (classe.getTipoClasse() == Archs.CONTROLLER) {
+						classe.setTipoClasse(Archs.PRESENTER);
 					}
 				}
-				
+
 				MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Informação", "Arquiteura MVP");
 				openView();
 			}
-				
-			
-			
+
 		} catch (JavaModelException e) {
 			e.printStackTrace();
 		} catch (CoreException e) {
@@ -91,7 +91,6 @@ public class SampleHandler extends AbstractHandler {
 		}
 		return null;
 	}
-
 
 	private void getDependencies(final IProject project) throws CoreException {
 		project.accept(new IResourceVisitor() {
@@ -101,7 +100,7 @@ public class SampleHandler extends AbstractHandler {
 				if (resource instanceof IFile && resource.getName().endsWith(".java")) {
 					ICompilationUnit unit = ((ICompilationUnit) JavaCore.create((IFile) resource));
 					DependencyVisitor dp = new DependencyVisitor(unit);
-					classesDependencias.add(new Dependencias(dp.getClazz(), dp.getTypes(), dp.getImports()));
+					classesDependencias.add(new Dependencias(dp.getClazz(), dp.getDependencias()));
 				}
 				return true;
 			}
@@ -142,6 +141,5 @@ public class SampleHandler extends AbstractHandler {
 			e.printStackTrace();
 		}
 	}
-	
 
 }

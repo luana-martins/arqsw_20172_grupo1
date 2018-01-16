@@ -8,53 +8,55 @@ import java.util.Properties;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
-import tp9.enums.MVC;
+import tp9.enums.Archs;
+import tp9.handlers.SampleHandler;
 
 public class Dependencias {
 
 	private IPackageFragment pacote;
 	private IType classe;
-	private ArrayList<String> types;
-	private ArrayList<String> imports;
+	private ArrayList<String> dependencias;
 	private int[] mvc;
-	private MVC tipoClasse;
-	private static boolean temUmaViewMVC = false;
+	private Archs tipoClasse;
 
-	public Dependencias(IType classe, ArrayList<String> types, ArrayList<String> imports) {
+	public Dependencias(IType classe, ArrayList<String> dependencias) {
 		this.pacote = classe.getPackageFragment();
 		this.classe = classe;
-		this.types = types;
-		this.imports = imports;
+		this.dependencias = dependencias;
 		this.mvc = countsMVC();
 
 	}
 
 	private int[] countsMVC() {
 		try {
-			Properties p = new Properties();
 
+			// le o arquivo com as classes pertencentes ao mvc
+			Properties p = new Properties();
 			p.load(new FileInputStream(System.getProperty("user.dir") + "/mvc.txt"));
 
+			// salva cada classe em uma array de strings
 			String[] model = p.getProperty("model").split(",");
 			String[] view = p.getProperty("view").split(",");
 			String[] controller = p.getProperty("controller").split(",");
 
 			int countModel = 0, countView = 0, countController = 0;
 
+			// verifica para cada dependencia do prejeto se contem classes do
+			// mvc
 			for (String m : model) {
-				if (types.contains(m) && imports.contains(m)) {
+				if (dependencias.contains(m)) {
 					countModel++;
 				}
 			}
 
 			for (String v : view) {
-				if (types.contains(v) && imports.contains(v)) {
+				if (dependencias.contains(v)) {
 					countView++;
 				}
 			}
 
 			for (String c : controller) {
-				if (types.contains(c) && imports.contains(c)) {
+				if (dependencias.contains(c)) {
 					countController++;
 				}
 			}
@@ -63,27 +65,27 @@ public class Dependencias {
 
 			// verifica se pertence ao model
 			if (mvc[0] > 0 && mvc[1] == 0 && mvc[2] == 0) {
-				tipoClasse = MVC.MODEL;
+				tipoClasse = Archs.MODEL;
 			}
 
 			// verifica se pertence ao view do mvc
 			else if (mvc[1] > mvc[0] && mvc[1] > mvc[2] && mvc[0] != 0) {
-				tipoClasse = MVC.VIEW_MVC;
-				temUmaViewMVC = true;
+				tipoClasse = Archs.VIEW_MVC;
+				SampleHandler.temUmaViewMVC = true;
 			}
-			
+
 			// verifica se pertence ao view do mvp
-			else if (mvc[1] > mvc[0] && mvc[1] > mvc[2] && mvc[0] ==0) {
-				tipoClasse = MVC.VIEW_MVP;
+			else if (mvc[1] > mvc[0] && mvc[1] > mvc[2] && mvc[0] == 0) {
+				tipoClasse = Archs.VIEW_MVP;
 			}
 
 			// verifica se pertence ao controller/presenter
 			else if (mvc[2] > mvc[0] && mvc[2] > mvc[1]) {
-				tipoClasse = MVC.CONTROLLER;
+				tipoClasse = Archs.CONTROLLER;
 			}
 
 			else {
-				tipoClasse = MVC.NENHUM;
+				tipoClasse = Archs.MODEL_OU_NENHUM;
 			}
 
 			return mvc;
@@ -103,30 +105,19 @@ public class Dependencias {
 		return classe;
 	}
 
-	public ArrayList<String> getTypes() {
-		return types;
-	}
-
-	public ArrayList<String> getImports() {
-		return imports;
+	public ArrayList<String> getDependencias() {
+		return dependencias;
 	}
 
 	public int[] getMVCCounts() {
 		return mvc;
 	}
 
-	public MVC getTipoClasse() {
+	public Archs getTipoClasse() {
 		return tipoClasse;
 	}
-	
-	public void setTipoClasse(MVC tipoClasse){
+
+	public void setTipoClasse(Archs tipoClasse) {
 		this.tipoClasse = tipoClasse;
 	}
-
-	public static boolean temUmaViewMVC() {
-		return temUmaViewMVC;
-	}
-	
-	
-
 }

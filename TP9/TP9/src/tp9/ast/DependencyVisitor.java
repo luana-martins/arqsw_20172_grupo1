@@ -26,12 +26,10 @@ public class DependencyVisitor extends ASTVisitor {
 	private IPackageFragment pacote;
 	private IType clazz;
 	private ICompilationUnit unit;
-	private ArrayList<String> imports;
-	private ArrayList<String> types;
+	private ArrayList<String> dependencias;
 
 	public DependencyVisitor(ICompilationUnit unit) throws JavaModelException {
-		imports = new ArrayList<String>();
-		types = new ArrayList<String>();
+		dependencias = new ArrayList<String>();
 		this.unit = unit;
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
@@ -50,12 +48,12 @@ public class DependencyVisitor extends ASTVisitor {
 		pacote = (IPackageFragment) pack.resolveBinding().getJavaElement();
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(ImportDeclaration pack) {
-		imports.add(pack.resolveBinding().getJavaElement().getElementName());
+		dependencias.add(pack.resolveBinding().getJavaElement().getElementName());
 		return true;
-	}	
+	}
 
 	@Override
 	public boolean visit(TypeDeclaration node) {
@@ -71,8 +69,8 @@ public class DependencyVisitor extends ASTVisitor {
 						&& t.getFullyQualifiedName()
 								.equals(node.getSuperclassType().resolveBinding().getQualifiedName())
 						&& !node.resolveBinding().isPrimitive()) {
-					if (!types.contains(t.getElementName())) {
-						types.add(t.getElementName());
+					if (!dependencias.contains(t.getElementName())) {
+						dependencias.add(t.getElementName());
 					}
 				}
 			}
@@ -85,8 +83,8 @@ public class DependencyVisitor extends ASTVisitor {
 					SimpleType st = (SimpleType) it;
 					if (t.getFullyQualifiedName().equals(st.getName().resolveTypeBinding().getQualifiedName())
 							&& !node.resolveBinding().isPrimitive()) {
-						if (!types.contains(t.getElementName())) {
-							types.add(t.getElementName());
+						if (!dependencias.contains(t.getElementName())) {
+							dependencias.add(t.getElementName());
 						}
 					}
 				}
@@ -100,8 +98,8 @@ public class DependencyVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(FieldDeclaration node) {
 
-		if (!types.contains(node.getType().resolveBinding().getName()) && !node.getType().isPrimitiveType()) {
-			types.add(node.getType().resolveBinding().getName());
+		if (!dependencias.contains(node.getType().resolveBinding().getName()) && !node.getType().isPrimitiveType()) {
+			dependencias.add(node.getType().resolveBinding().getName());
 		}
 
 		return true;
@@ -113,9 +111,9 @@ public class DependencyVisitor extends ASTVisitor {
 		for (Object o : node.parameters()) {
 			if (o instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration svd = (SingleVariableDeclaration) o;
-				if (!types.contains(svd.getType().resolveBinding().getName())
+				if (!dependencias.contains(svd.getType().resolveBinding().getName())
 						&& !svd.getType().isPrimitiveType()) {
-					types.add(svd.getType().resolveBinding().getName());
+					dependencias.add(svd.getType().resolveBinding().getName());
 				}
 			}
 		}
@@ -124,19 +122,16 @@ public class DependencyVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
-		if (!types.contains(node.getType().resolveBinding().getName()) && !node.getType().isPrimitiveType()) {
-			types.add(node.getType().resolveBinding().getName());
+		if (!dependencias.contains(node.getType().resolveBinding().getName()) && !node.getType().isPrimitiveType()) {
+			dependencias.add(node.getType().resolveBinding().getName());
 		}
 		return true;
 	}
 
-	public ArrayList<String> getTypes() {
-		return types;
+	public ArrayList<String> getDependencias() {
+		return dependencias;
 	}
-	
-	public ArrayList<String> getImports() {
-		return imports;
-	}
+
 	public IType getClazz() {
 		return clazz;
 	}
@@ -144,6 +139,5 @@ public class DependencyVisitor extends ASTVisitor {
 	public IPackageFragment getPacote() {
 		return pacote;
 	}
-
 
 }

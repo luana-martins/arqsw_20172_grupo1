@@ -1,5 +1,6 @@
 package tp9.views;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -10,6 +11,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -20,10 +22,14 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.part.FileEditorInput;
 
 import tp9.handlers.SampleHandler;
 import tp9.persistences.Dependencias;
@@ -61,7 +67,7 @@ public class SampleView extends ViewPart {
 				return d.getTipoClasse().toString();
 			}
 		});
-		
+
 		col = createTableViewerColumn(titles[2], bounds[2], 2);
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -70,7 +76,7 @@ public class SampleView extends ViewPart {
 				return Integer.toString(d.getMVCCounts()[0]);
 			}
 		});
-		
+
 		col = createTableViewerColumn(titles[3], bounds[3], 3);
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -79,7 +85,7 @@ public class SampleView extends ViewPart {
 				return Integer.toString(d.getMVCCounts()[1]);
 			}
 		});
-		
+
 		col = createTableViewerColumn(titles[4], bounds[4], 4);
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -138,6 +144,20 @@ public class SampleView extends ViewPart {
 
 		doubleClickAction = new Action() {
 			public void run() {
+				try {
+					IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+					Dependencias m = (Dependencias) selection.getFirstElement();
+
+					IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+					IFile file = (IFile) m.getClasse().getCompilationUnit().getResource();
+
+					IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry()
+							.getDefaultEditor(file.getName());
+					page.openEditor(new FileEditorInput(file), desc.getId());
+
+				} catch (PartInitException e) {
+					e.printStackTrace();
+				}
 
 			}
 		};
@@ -191,4 +211,4 @@ public class SampleView extends ViewPart {
 		applyRemodularizationAction.setEnabled(true);
 	}
 
-	}
+}
