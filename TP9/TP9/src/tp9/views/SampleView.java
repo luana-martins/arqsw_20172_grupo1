@@ -6,12 +6,10 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -23,15 +21,12 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.ViewPart;
 
 import tp9.handlers.SampleHandler;
+import tp9.persistences.Dependencias;
 
 public class SampleView extends ViewPart {
 
@@ -42,19 +37,19 @@ public class SampleView extends ViewPart {
 	private Action applyRemodularizationAction;
 
 	public void createPartControl(Composite parent) {
-		GridLayout layout = new GridLayout(4, false);
+		GridLayout layout = new GridLayout(5, false);
 		parent.setLayout(layout);
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
-		String[] titles = { "Classe", "Pacote Destino", "Sim. Pacote Atual", "Sim. Pacote Destino" };
-		int[] bounds = { 150, 150, 150, 150 };
+		String[] titles = { "Classe", "Pertence a", "Model", "View", "Controller" };
+		int[] bounds = { 200, 100, 50, 50, 50 };
 
 		TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0);
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				//Recomendacao r = (Recomendacao) element;
-				return "";
+				Dependencias d = (Dependencias) element;
+				return d.getClasse().getFullyQualifiedName();
 			}
 		});
 
@@ -62,8 +57,8 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				//Recomendacao r = (Recomendacao) element;
-				return "";
+				Dependencias d = (Dependencias) element;
+				return d.getTipoClasse().toString();
 			}
 		});
 		
@@ -71,8 +66,8 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				//Recomendacao r = (Recomendacao) element;
-				return "";
+				Dependencias d = (Dependencias) element;
+				return Integer.toString(d.getMVCCounts()[0]);
 			}
 		});
 		
@@ -80,8 +75,17 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				//Recomendacao r = (Recomendacao) element;
-				return "";
+				Dependencias d = (Dependencias) element;
+				return Integer.toString(d.getMVCCounts()[1]);
+			}
+		});
+		
+		col = createTableViewerColumn(titles[4], bounds[4], 4);
+		col.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Dependencias d = (Dependencias) element;
+				return Integer.toString(d.getMVCCounts()[2]);
 			}
 		});
 
@@ -93,7 +97,7 @@ public class SampleView extends ViewPart {
 
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
 
-		viewer.setInput("");
+		viewer.setInput(SampleHandler.classesDependencias);
 		getSite().setSelectionProvider(viewer);
 
 		GridData gridData = new GridData();

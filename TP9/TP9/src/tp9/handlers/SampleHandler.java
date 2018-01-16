@@ -19,6 +19,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import tp9.ast.DependencyVisitor;
+import tp9.enums.MVC;
 import tp9.persistences.Dependencias;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -28,7 +29,7 @@ public class SampleHandler extends AbstractHandler {
 
 	public static ExecutionEvent event;
 	public static IJavaProject javaProject;
-	private ArrayList<Dependencias> classesDependencias;
+	public static ArrayList<Dependencias> classesDependencias;
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -46,7 +47,6 @@ public class SampleHandler extends AbstractHandler {
 
 			getDependencies(iProject);
 			
-			//Separa em um map as classes por pacotes
 			for(Dependencias classe : classesDependencias){
 				System.out.println("----------------------------------------------------------------------------------------");
 				System.out.println("Classe: "+classe.getClasse().getFullyQualifiedName());
@@ -58,10 +58,32 @@ public class SampleHandler extends AbstractHandler {
 				
 			}
 			
+			if(Dependencias.temUmaViewMVC()){
+				for(Dependencias classe : classesDependencias){
+					if(classe.getTipoClasse() == MVC.VIEW_MVP || classe.getTipoClasse() == MVC.VIEW_MVC){
+						classe.setTipoClasse(MVC.VIEW);
+					}
+				}
+				
+				MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Informação", "Arquiteura MVC");
+				openView();
+				
+			} else{
+				for(Dependencias classe : classesDependencias){
+					if(classe.getTipoClasse() == MVC.VIEW_MVP || classe.getTipoClasse() == MVC.VIEW_MVC){
+						classe.setTipoClasse(MVC.VIEW);
+					}
+					if(classe.getTipoClasse() == MVC.CONTROLLER){
+						classe.setTipoClasse(MVC.PRESENTER);
+					}
+				}
+				
+				MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Informação", "Arquiteura MVP");
+				openView();
+			}
 				
 			
-			openView();
-
+			
 		} catch (JavaModelException e) {
 			e.printStackTrace();
 		} catch (CoreException e) {
