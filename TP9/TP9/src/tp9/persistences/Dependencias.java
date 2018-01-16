@@ -32,7 +32,7 @@ public class Dependencias {
 
 			// le o arquivo com as classes pertencentes ao mvc
 			Properties p = new Properties();
-			p.load(new FileInputStream(System.getProperty("user.dir") + "/mvc.txt"));
+			p.load(new FileInputStream(/*System.getProperty("user.dir") + "/mvc.txt"*/"mvc.txt"));
 
 			// salva cada classe em uma array de strings
 			String[] model = p.getProperty("model").split(",");
