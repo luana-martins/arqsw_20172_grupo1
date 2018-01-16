@@ -1,0 +1,10 @@
+model CANNOT view
+model CANNOT controller
+util CANNOT model
+util CANNOT controller
+util CANNOT view
+view CANNOT model
+model CANNOT awt
+controller CANNOT awt
+view CAN awt
+view MUST model

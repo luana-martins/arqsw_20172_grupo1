@@ -1,4 +1,10 @@
 package tp10.views;
+import org.eclipse.swt.graphics.Color;
+
+import java.awt.Font;
+
+import javax.swing.text.AttributeSet.ColorAttribute;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -6,10 +12,13 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.internal.text.revisions.Colors;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -17,6 +26,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -40,13 +50,14 @@ public class SampleView extends ViewPart {
 	private TableViewer viewer;
 	private Action doubleClickAction;
 	private Action applyRemodularizationAction;
-
+	private IColorProvider colorProvider;
+	
 	public void createPartControl(Composite parent) {
 		GridLayout layout = new GridLayout(4, false);
 		parent.setLayout(layout);
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
-		String[] titles = { "Classe", "Pacote Destino", "Sim. Pacote Atual", "Sim. Pacote Destino" };
+		String[] titles = { "Pacote A", "Pacote B", "A->B", "Sim. Pacote Destino" };
 		int[] bounds = { 150, 150, 150, 150 };
 
 		TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0);
@@ -56,7 +67,27 @@ public class SampleView extends ViewPart {
 				StatusConversa r = (StatusConversa) element;
 				return r.getClasseA();
 			}
+			
+			public Color getBackground(Object element) {
+				StatusConversa r = (StatusConversa) element;
+				if(r.getTipoDependencia() == 4) {
+					return Display.getCurrent().getSystemColor(SWT.COLOR_RED);
+				}
+				else if(r.getTipoDependencia() == 2) {
+					return Display.getCurrent().getSystemColor(SWT.COLOR_YELLOW);
+				}
+				else if(r.getTipoDependencia() == 3) {
+					return Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
+				}
+				else if(r.getTipoDependencia() == 0) {
+					return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
+				}
+				else {
+				return Display.getCurrent().getSystemColor(SWT.COLOR_WHITE);
+				}
+			}
 		});
+		
 
 		col = createTableViewerColumn(titles[1], bounds[1], 1);
 		col.setLabelProvider(new ColumnLabelProvider() {
@@ -64,6 +95,25 @@ public class SampleView extends ViewPart {
 			public String getText(Object element) {
 				StatusConversa r = (StatusConversa) element;
 				return r.getClasseB();
+			}
+			
+			public Color getBackground(Object element) {
+				StatusConversa r = (StatusConversa) element;
+				if(r.getTipoDependencia() == 4) {
+					return Display.getCurrent().getSystemColor(SWT.COLOR_RED);
+				}
+				else if(r.getTipoDependencia() == 2) {
+					return Display.getCurrent().getSystemColor(SWT.COLOR_YELLOW);
+				}
+				else if(r.getTipoDependencia() == 3) {
+					return Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
+				}
+				else if(r.getTipoDependencia() == 0) {
+					return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
+				}
+				else {
+				return Display.getCurrent().getSystemColor(SWT.COLOR_WHITE);
+				}
 			}
 		});
 		
@@ -73,6 +123,25 @@ public class SampleView extends ViewPart {
 			public String getText(Object element) {
 				StatusConversa r = (StatusConversa) element;
 				return String.valueOf(r.getTipoDependencia());
+			}
+			
+			public Color getBackground(Object element) {
+				StatusConversa r = (StatusConversa) element;
+				if(r.getTipoDependencia() == 4) {
+					return Display.getCurrent().getSystemColor(SWT.COLOR_RED);
+				}
+				else if(r.getTipoDependencia() == 2) {
+					return Display.getCurrent().getSystemColor(SWT.COLOR_YELLOW);
+				}
+				else if(r.getTipoDependencia() == 3) {
+					return Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
+				}
+				else if(r.getTipoDependencia() == 0) {
+					return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
+				}
+				else {
+				return Display.getCurrent().getSystemColor(SWT.COLOR_WHITE);
+				}
 			}
 		});
 		
@@ -86,7 +155,6 @@ public class SampleView extends ViewPart {
 
 		viewer.setInput(SampleHandler.recomendacoes);
 		getSite().setSelectionProvider(viewer);
-
 		GridData gridData = new GridData();
 		gridData.verticalAlignment = GridData.FILL;
 		gridData.horizontalSpan = 2;
@@ -101,6 +169,7 @@ public class SampleView extends ViewPart {
 		hookDoubleClickAction();
 
 	}
+	
 
 	public void setFocus() {
 		viewer.getControl().setFocus();

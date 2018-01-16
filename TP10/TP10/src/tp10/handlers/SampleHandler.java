@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -28,7 +29,7 @@ import tp10.persistences.StatusConversa;
 import tp10.regras.Regras;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.jface.viewers.TreeSelection;import org.eclipse.swt.widgets.Display;
 
 @SuppressWarnings("restriction")
 public class SampleHandler extends AbstractHandler {
@@ -59,32 +60,15 @@ public class SampleHandler extends AbstractHandler {
 
 			getDependencies(iProject);
 			
-			//Separa em um map as classes por pacotes
-			for(int i=0; i<todosPacotes.size(); i++){
-				ArrayList<Dependencias> classesMesmoPacote = new ArrayList<Dependencias>();
-				for(Dependencias classe : classesDependencias){
-					if(classe.getPacote().getElementName().compareTo(todosPacotes.get(i).getElementName()) == 0){
-						classesMesmoPacote.add(classe);
-					//	System.out.println(" pacote "+classe.getPacote().getElementName());
-					
-					}
-				}
-				
-				classesPacotes.put(todosPacotes.get(i), classesMesmoPacote);
-			}
-
-			
-			
-			
 				
 			
 			ArrayList<StatusConversa> statusConversas = new ArrayList<StatusConversa>();
 			Regras regras = new Regras( classesDependencias);
 			statusConversas = regras.especificacaoDasDependencias();
 			
-			for(int i = 0; i < statusConversas.size();i++) {
-				System.out.println("tipo dep "+ statusConversas.get(i).getTipoDependencia()+" "
-						+ statusConversas.get(i).getClasseA()+" depende de "+statusConversas.get(i).getClasseB());
+			for(int i = 0; i < recomendacoes.size();i++) {
+				System.out.println("tipo dep "+ recomendacoes.get(i).getTipoDependencia()+" "
+						+ recomendacoes.get(i).getClasseA()+" depende de "+recomendacoes.get(i).getClasseB());
 			}
 			
 			openView();
