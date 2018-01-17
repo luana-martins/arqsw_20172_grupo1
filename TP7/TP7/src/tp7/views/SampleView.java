@@ -32,7 +32,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.ViewPart;
 
 import tp7.handlers.SampleHandler;
-import tp7.persistences.StatusConversa;
+import tp7.persistences.Recomendacao;
 
 public class SampleView extends ViewPart {
 
@@ -54,8 +54,8 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				StatusConversa r = (StatusConversa) element;
-				return r.getClasseA();
+				Recomendacao r = (Recomendacao) element;
+				return r.getClasse().getFullyQualifiedName();
 			}
 		});
 
@@ -63,8 +63,8 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				StatusConversa r = (StatusConversa) element;
-				return r.getClasseB();
+				Recomendacao r = (Recomendacao) element;
+				return r.getPacoteDestino().getElementName();
 			}
 		});
 		
@@ -72,11 +72,20 @@ public class SampleView extends ViewPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				StatusConversa r = (StatusConversa) element;
-				return String.valueOf(r.getTipoDependencia());
+				Recomendacao r = (Recomendacao) element;
+				return String.valueOf(r.getSimPacoteAtual());
 			}
 		});
 		
+		col = createTableViewerColumn(titles[3], bounds[3], 3);
+		col.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Recomendacao r = (Recomendacao) element;
+				return String.valueOf(r.getSimPacoteDestino());
+			}
+		});
+
 		viewer.refresh();
 
 		final Table table = viewer.getTable();
@@ -127,7 +136,8 @@ public class SampleView extends ViewPart {
 		doubleClickAction = new Action() {
 			public void run() {
 				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-				StatusConversa r = (StatusConversa) selection.getFirstElement();
+				Recomendacao r = (Recomendacao) selection.getFirstElement();
+				r.moverClasse();
 				MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event), "Informação",
 						"Refatoração realizada com sucesso!");
 				
