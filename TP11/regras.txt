@@ -1,0 +1,4 @@
+view CAN controller
+model CANNOT view
+view MUST awt
+controller CANNOT awt
