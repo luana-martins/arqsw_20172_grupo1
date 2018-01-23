@@ -90,7 +90,9 @@ public class Regras {
 
 	public Integer conversa(String a, String b, int tipoDependencia) {
 		int cont = 0;
-
+		if (a == b) {
+			return -1;
+		}
 		// depende de classes
 		if (!p.containsKey(b)) {
 			for (int i = 0; i < classesDependencias.size(); i++) {
@@ -100,6 +102,7 @@ public class Regras {
 							if (classesDependencias.get(i).getDependencias()
 									.contains(classesDependencias.get(j).getClasse().getElementName())) {
 								cont++;
+
 							}
 						}
 					}
@@ -133,5 +136,16 @@ public class Regras {
 	}
 
 	public Regras() {
+	}
+
+	public int ciclo(int i, int j) {
+		if ((SampleHandler.dependencias.get(i - 1).getArray().get(j - 1) != 0)
+				&& (SampleHandler.dependencias.get(i - 1).getArray().get(j - 1) != -1)) {
+			if ((SampleHandler.dependencias.get(j - 1).getArray().get(i - 1) != 0)
+					&& (SampleHandler.dependencias.get(j - 1).getArray().get(i - 1) != -1)) {
+				return 1;
+			}
+		}
+		return 0;
 	}
 }

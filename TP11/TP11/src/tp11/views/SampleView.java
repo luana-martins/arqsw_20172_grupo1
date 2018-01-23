@@ -24,6 +24,8 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
 
 import tp11.handlers.SampleHandler;
 import tp11.persistences.DependenciasPacote;
@@ -54,12 +56,26 @@ public class SampleView extends ViewPart {
 			TableViewerColumn col2 = createTableViewerColumn(titles[i], 100, i);
 			col2.setLabelProvider(new ColumnLabelProvider() {
 				int i = 0;
-
 				@Override
 				public String getText(Object element) {
 					DependenciasPacote r = (DependenciasPacote) element;
+					if(r.getFromArray()==-1) {
+						return "-";
+					}
 					return Integer.toString(r.getFromArray());
 
+				}
+				
+				@Override
+				public Color getForeground(Object element) {
+					DependenciasPacote r = (DependenciasPacote) element;
+					Regras regras = new Regras();
+					int a = regras.ciclo(i, r.getContador());
+					if (a == 1) {
+						return Display.getCurrent().getSystemColor(SWT.COLOR_MAGENTA);
+					} else {
+						return Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
+					}
 				}
 
 				@Override
