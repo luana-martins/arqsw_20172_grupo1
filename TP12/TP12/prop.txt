@@ -1,0 +1,2 @@
+swing = ChangeListener, ChangeEvent, Jdialog, Jlabel, Jbutton, Jslider, Jframe,Jlabel, JtextField, JtextPane, JscrollPane, JButton 
+awt = ActionListener, ActionEvent, GridLayout, WindowAdapter, WindowEvent, Button, Frame, GridLayout, Label, Window, GridLayout, WindowAdapter, WindowEvent
