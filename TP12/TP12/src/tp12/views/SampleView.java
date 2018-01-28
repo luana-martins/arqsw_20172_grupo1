@@ -1,7 +1,5 @@
 package tp12.views;
 
-import java.util.ArrayList;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -17,11 +15,9 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -50,19 +46,19 @@ public class SampleView extends ViewPart {
 	private Action applyRemodularizationAction;
 
 	public void createPartControl(Composite parent) {
-		GridLayout layout = new GridLayout(2, false);
+		GridLayout layout = new GridLayout(3, false);
 		parent.setLayout(layout);
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
-		String[] titles = { "Violação", "Recomendação" };
-		int[] bounds = {200, 200};
+		String[] titles = { "Regra", "Recomendação", "Pacotes/Classes Envolvidas" };
+		int[] bounds = {150, 150, 300};
 
 		TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0);
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				Violation v = (Violation) element;
-				return "";
+				return v.getRule();
 			}
 
 		});
@@ -72,7 +68,22 @@ public class SampleView extends ViewPart {
 			@Override
 			public String getText(Object element) {
 				Violation v = (Violation) element;
-				return "";
+				return v.getRecommendation();
+			}
+		});
+		
+		col = createTableViewerColumn(titles[2], bounds[2], 2);
+		col.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Violation v = (Violation) element;
+				if(v.getRuleType() < 2){
+					return v.getPackageA().getElementName()+", "+v.getPackageB().getElementName();
+				}
+				else{
+					return v.getClassA().getFullyQualifiedName()+", "+v.getClassB().getFullyQualifiedName();
+				}
+				
 			}
 		});
 
@@ -129,22 +140,24 @@ public class SampleView extends ViewPart {
 				
 				//checar regra CAN
 				if(v.getRuleType() == 0){
-					String message = "O pacote "+v.getPackageA().getElementName()+" poderia depender do pacote "+v.getPackageB()+" mas não depende =(";
+					String message = "O pacote "+v.getPackageA().getElementName()+" poderia depender do pacote "+v.getPackageB().getElementName()+" mas não depende."
+							+ "\nVerifique alguma classe do pacote "+v.getPackageB().getElementName()+" que possa ser utilizada por alguma classe do pacote "+v.getPackageA().getElementName()+".";
 					MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event),"Informação sobre Violação", message);
 
 				}
 				
 				//checar regra MUST
 				else if(v.getRuleType() == 1){
-					String message = "O pacote "+v.getPackageA().getElementName()+" deveria depender do pacote "+v.getPackageB()+" mas não depende >=(";
+					String message = "O pacote "+v.getPackageA().getElementName()+" deveria depender do pacote "+v.getPackageB().getElementName()+" mas não depende."
+							+ "\nVerifique alguma classe do pacote "+v.getPackageB().getElementName()+" que possa ser utilizada por alguma classe do pacote "+v.getPackageA().getElementName()+".";
 					MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event),"Informação sobre Violação", message);
 				}
 				
 				//checar regra CANNOT para dependencia de extends ou implements
 				else if(v.getRuleType() == 2 && v.getDependencyFound().compareTo(Dependencies.EXTENDS_OR_IMPLEMENTS) == 0){
-					String message = "O pacote "+v.getPackageA().getElementName()+" não pode depender do pacote "+v.getPackageB()+" mas depende =O"
-							+ "\n Há a opção de mover a classe "+v.getClassA()+" para o pacote "+v.getPackageB()
-									+ "\n Pode mover?";
+					String message = "O pacote "+v.getPackageA().getElementName()+" não pode depender do pacote "+v.getPackageB().getElementName()+" mas depende."
+							+ "\nHá a opção de mover a classe "+v.getClassA().getFullyQualifiedName()+" para o pacote "+v.getPackageB().getElementName()+"."
+									+ "\nDeseja mover?";
 					boolean ok = MessageDialog.openConfirm(HandlerUtil.getActiveShell(SampleHandler.event),"Informação sobre Violação", message);
 					
 					if(ok){
@@ -155,9 +168,9 @@ public class SampleView extends ViewPart {
 				
 				//checar regra CANNOT para atributos
 				else if(v.getRuleType() == 2 && v.getDependencyFound().compareTo(Dependencies.ATTRIBUTE) == 0){
-					String message = "O pacote "+v.getPackageA().getElementName()+" não pode depender do pacote "+v.getPackageB()+" mas depende =O"
-							+ "\n Há a opção de mover a classe "+v.getClassA()+" para o pacote "+v.getPackageB()
-									+ "\n Pode mover?";
+					String message = "O pacote "+v.getPackageA().getElementName()+" não pode depender do pacote "+v.getPackageB().getElementName()+" mas depende."
+							+ "\nHá a opção de mover a classe "+v.getClassA().getFullyQualifiedName()+" para o pacote "+v.getPackageB().getElementName()+"."
+									+ "\nDeseja mover?";
 					boolean ok = MessageDialog.openConfirm(HandlerUtil.getActiveShell(SampleHandler.event),"Informação sobre Violação", message);
 					
 					if(ok){
@@ -167,25 +180,25 @@ public class SampleView extends ViewPart {
 				
 				//checar regra CANNOT para parametros de metodos
 				else if(v.getRuleType() == 2 && v.getDependencyFound().compareTo(Dependencies.METHOD_PARAMETER) == 0){
-					String message = "O pacote "+v.getPackageA().getElementName()+" não pode depender do pacote "+v.getPackageB()+" mas depende =O"
-							+ "\n Há a opção de mover o metodo "+v.getMethod().getElementName()+" para a classe "+v.getClassB()
-									+ "\n Pode mover?";
+					String message = "O pacote "+v.getPackageA().getElementName()+" não pode depender do pacote "+v.getPackageB().getElementName()+" mas depende."
+							+ "\nHá a opção de mover o metodo "+v.getMethod().getElementName()+" para a classe "+v.getClassB().getElementName()+"."
+									+ "\nDeseja mover?";
 					boolean ok = MessageDialog.openConfirm(HandlerUtil.getActiveShell(SampleHandler.event),"Informação sobre Violação", message);
 					
 					if(ok){
-						MoveMethod.performMoveMethod(v.getMethod(), v.getClassB().getElementName());;
+						MoveMethod.performMoveMethod(v.getMethod(), v.getClassB().getElementName());
 					}
 				}
 				
 				//checar regra CANNOT para outras instancias
 				else if(v.getRuleType() == 2 && v.getDependencyFound().compareTo(Dependencies.OTHER_INSTANCE) == 0){
-					String message = "O pacote "+v.getPackageA().getElementName()+" não pode depender do pacote "+v.getPackageB()+" mas depende =O"
-							+ "\n Há a opção de mover a classe "+v.getClassA()+" para o pacote "+v.getPackageB()
-									+ "\n Pode mover?";
+					String message = "O pacote "+v.getPackageA().getElementName()+" não pode depender do pacote "+v.getPackageB().getElementName()+" mas depende."
+							+ "\nHá a opção de mover a classe "+v.getClassA().getFullyQualifiedName()+" para o pacote "+v.getPackageB().getElementName()+"."
+									+ "\nDeseja mover?";
 					boolean ok = MessageDialog.openConfirm(HandlerUtil.getActiveShell(SampleHandler.event),"Informação sobre Violação", message);
 					
 					if(ok){
-						MoveMethod.performMoveMethod(v.getMethod(), v.getClassB().getElementName());;
+						MoveMethod.performMoveMethod(v.getMethod(), v.getClassB().getFullyQualifiedName());
 					}				
 				}
 				

@@ -61,6 +61,44 @@ public class Violation{
 	public Dependencies getDependencyFound() {
 		return dependencyFound;
 	}
+	
+	public String getRule(){
+		
+		String rule = "";
+		
+		if(ruleType == 0){
+			rule = packageA.getElementName()+" CAN "+packageB.getElementName();
+		}
+		
+		else if(ruleType == 1){
+			rule = packageA.getElementName()+" MUST "+packageB.getElementName();
+		}
+		
+		else if(ruleType == 2){
+			rule = packageA.getElementName()+" CANNOT "+packageB.getElementName();
+		}
+		
+		return rule;
+	}
+	
+	public String getRecommendation(){
+		String recommendation = "";
+		
+		if(ruleType < 2){
+			recommendation = "Verificação Manual";
+		}
+		
+		else{
+			if(dependencyFound.compareTo(Dependencies.METHOD_PARAMETER) == 0){
+				recommendation = "Mover Método";
+			}
+			else{
+				recommendation = "Mover Classe";
+			}
+		}
+		
+		return recommendation;
+	}
 
 	public void printAllViolations(){
 		if(ruleType == 2){

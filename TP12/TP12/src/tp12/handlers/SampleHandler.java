@@ -28,7 +28,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import tp12.ast.DependencyVisitor;
 import tp12.persistences.Dependency;
 import tp12.persistences.Violation;
-import tp12.regras.RulesChecker;
+import tp12.rules.RulesChecker;
 
 @SuppressWarnings("restriction")
 public class SampleHandler extends AbstractHandler {

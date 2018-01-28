@@ -39,7 +39,6 @@ public class DependencyVisitor extends ASTVisitor {
 	public DependencyVisitor(ICompilationUnit unit) throws JavaModelException {
 		extendsAndImplementsTypes = new ArrayList<String>();
 		attributesTypes = new ArrayList<String>();
-		parametersMethod = new ArrayList<String>();
 		allOthersInstancesTypes = new ArrayList<String>();
 		methodsAndParametersTypes = new HashMap<IMethod, ArrayList<String>>();
 		this.unit = unit;
@@ -110,10 +109,13 @@ public class DependencyVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
-
+		
+		parametersMethod = new ArrayList<String>();
+		
 		for (Object o : node.parameters()) {
 			if (o instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration svd = (SingleVariableDeclaration) o;
+				
 				if (!parametersMethod.contains(svd.getType().resolveBinding().getName()) && !svd.getType().isPrimitiveType()) {
 					parametersMethod.add(svd.getType().resolveBinding().getQualifiedName());
 					
@@ -122,6 +124,8 @@ public class DependencyVisitor extends ASTVisitor {
 		}
 		
 		methodsAndParametersTypes.put((IMethod) node.resolveBinding().getJavaElement(), parametersMethod);
+		
+		
 		return true;
 	}
 

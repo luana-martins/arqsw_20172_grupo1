@@ -1,18 +1,23 @@
 package tp12.refactorings;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
+import org.eclipse.ui.handlers.HandlerUtil;
+
+import tp12.handlers.SampleHandler;
 
 @SuppressWarnings("restriction")
 public class MoveMethod {
@@ -28,6 +33,7 @@ public class MoveMethod {
 			for (int i = 0; i < targets.length; i++) {
 				if (targets[i].getType().getQualifiedName().compareTo(targetName) == 0) {
 					target = targets[i];
+					break;
 				}
 			}
 
@@ -51,6 +57,9 @@ public class MoveMethod {
 
 		} catch (OperationCanceledException | CoreException e) {
 			e.printStackTrace();
+		} catch (AssertionFailedException e){
+			MessageDialog.openInformation(HandlerUtil.getActiveShell(SampleHandler.event),"Informação sobre Violação", "Não é possível mover esse metodo automaticamente");
 		}
+		
 	}
 }
