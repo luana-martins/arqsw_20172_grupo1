@@ -27,6 +27,8 @@ public class MoveMethod {
 		try {
 			MoveInstanceMethodProcessor processor = new MoveInstanceMethodProcessor(method,
 					JavaPreferencesSettings.getCodeGenerationSettings(method.getJavaProject()));
+			
+			processor.checkInitialConditions(SingletonNullProgressMonitor.getNullProgressMonitor());
 
 			IVariableBinding[] targets = processor.getPossibleTargets();
 			IVariableBinding target = null;
@@ -36,8 +38,6 @@ public class MoveMethod {
 					break;
 				}
 			}
-
-			processor.checkInitialConditions(SingletonNullProgressMonitor.getNullProgressMonitor());
 
 			processor.setTarget(target);
 			processor.setInlineDelegator(true);

@@ -186,19 +186,19 @@ public class SampleView extends ViewPart {
 					boolean ok = MessageDialog.openConfirm(HandlerUtil.getActiveShell(SampleHandler.event),"Informação sobre Violação", message);
 					
 					if(ok){
-						MoveMethod.performMoveMethod(v.getMethod(), v.getClassB().getElementName());
+						MoveMethod.performMoveMethod(v.getMethod(), v.getClassB().getFullyQualifiedName());
 					}
 				}
 				
 				//checar regra CANNOT para outras instancias
 				else if(v.getRuleType() == 2 && v.getDependencyFound().compareTo(Dependencies.OTHER_INSTANCE) == 0){
 					String message = "O pacote "+v.getPackageA().getElementName()+" não pode depender do pacote "+v.getPackageB().getElementName()+" mas depende."
-							+ "\nHá a opção de mover a classe "+v.getClassA().getFullyQualifiedName()+" para o pacote "+v.getPackageB().getElementName()+"."
+							+ "\nHá a opção de mover a classe "+v.getClassB().getFullyQualifiedName()+" para o pacote "+v.getPackageA().getElementName()+"."
 									+ "\nDeseja mover?";
 					boolean ok = MessageDialog.openConfirm(HandlerUtil.getActiveShell(SampleHandler.event),"Informação sobre Violação", message);
 					
 					if(ok){
-						MoveMethod.performMoveMethod(v.getMethod(), v.getClassB().getFullyQualifiedName());
+						MoveClass.performMoveClassRefactoring(v.getClassB(), v.getPackageA());
 					}				
 				}
 				
